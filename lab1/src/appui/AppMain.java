@@ -11,6 +11,8 @@ package appui;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.awt.font.*;
 import java.awt.geom.*;
 import java.util.Date;
@@ -35,7 +37,7 @@ public class AppMain {
             // handle exception
         }
         WndFrame frame = new WndFrame();
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setVisible(true);
     }
 }
@@ -46,15 +48,55 @@ class WndFrame extends JFrame {
         setTitle("Text Editor, v0.1 alpha.");
         setSize(DEF_WIDTH, DEF_HEIGHT);
 
+        JMenuBar menu = new JMenuBar();
+        setJMenuBar(menu);
+
+        JMenu file = new JMenu("File");
+        menu.add(file);
+        JMenuItem mCreate = new JMenuItem("New...");
+        JMenuItem mOpen = new JMenuItem("Open...");
+        JMenuItem mSave = new JMenuItem("Save");
+        mSave.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_MASK));
+        JMenuItem mSaveAs = new JMenuItem("Save As...");
+        mSaveAs.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_MASK + InputEvent.SHIFT_MASK));
+        JMenuItem mExit = new JMenuItem("Exit");
+        file.add(mCreate);
+        file.add(mOpen);
+        file.addSeparator();
+        file.add(mSave);
+        file.add(mSaveAs);
+        file.addSeparator();
+        file.add(mExit);
+
+        JMenu edit = new JMenu("Edit");
+        menu.add(edit);
+        JMenuItem mUndo = new JMenuItem("Undo");
+        mUndo.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.CTRL_MASK));
+        JMenuItem mRedo = new JMenuItem("Redo");
+        mRedo.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_MASK));
+        JMenuItem mCut = new JMenuItem("Cut");
+        mCut.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X, InputEvent.CTRL_MASK));
+        JMenuItem mCopy = new JMenuItem("Copy");
+        mCopy.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_MASK));
+        JMenuItem mPaste = new JMenuItem("Paste");
+        mPaste.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V, InputEvent.CTRL_MASK));
+        edit.add(mUndo);
+        edit.add(mRedo);
+        edit.addSeparator();
+        edit.add(mCut);
+        edit.add(mCopy);
+        edit.add(mPaste);
+
+        JToolBar toolBar = new JToolBar("Toolbar");
+        add(toolBar);
+        //
 
         MPanel panel = new MPanel();
-
         add(panel);
-
     }
     public static final int DEF_WIDTH = 600;
     public static final int DEF_HEIGHT = 500;
-};
+}
 
 
 
@@ -112,4 +154,4 @@ class MPanel extends JPanel {
         button1.addActionListener(action1);
         button2.addActionListener(action2);
     }
-};
+}
