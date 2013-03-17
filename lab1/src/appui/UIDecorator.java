@@ -1,3 +1,5 @@
+package appui;
+
 /**
  * Created with IntelliJ IDEA.
  * User: lgsferry

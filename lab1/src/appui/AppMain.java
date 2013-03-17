@@ -21,7 +21,7 @@ import javax.swing.*;
 
 public class AppMain {
     public static void main(String[] args) {
-        try {
+        /*try {
             javax.swing.UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         }
         catch (UnsupportedLookAndFeelException e) {
@@ -35,7 +35,7 @@ public class AppMain {
         }
         catch (IllegalAccessException e) {
             // handle exception
-        }
+        }*/
         WndFrame frame = new WndFrame();
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setVisible(true);
@@ -45,15 +45,29 @@ public class AppMain {
 @SuppressWarnings("serial")
 class WndFrame extends JFrame {
     public WndFrame() {
+
+        /*
+         * Set default props
+         */
+
         setTitle("Text Editor, v0.1 alpha.");
         setSize(DEF_WIDTH, DEF_HEIGHT);
+
+        /*
+         * Menu
+         */
+
+        ImageIcon iNew = new ImageIcon(getClass().getResource("16796.ico"));
 
         JMenuBar menu = new JMenuBar();
         setJMenuBar(menu);
 
+        // Menu item FILE
+
         JMenu file = new JMenu("File");
+        file.setMnemonic(KeyEvent.VK_F);
         menu.add(file);
-        JMenuItem mCreate = new JMenuItem("New...");
+        JMenuItem mCreate = new JMenuItem("New...", iNew);
         JMenuItem mOpen = new JMenuItem("Open...");
         JMenuItem mSave = new JMenuItem("Save");
         mSave.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_MASK));
@@ -67,6 +81,8 @@ class WndFrame extends JFrame {
         file.add(mSaveAs);
         file.addSeparator();
         file.add(mExit);
+
+        // Menu item EDIT
 
         JMenu edit = new JMenu("Edit");
         menu.add(edit);
@@ -87,11 +103,19 @@ class WndFrame extends JFrame {
         edit.add(mCopy);
         edit.add(mPaste);
 
+        /*
+         * Toolbar
+         */
+
         JToolBar toolBar = new JToolBar("Toolbar");
         add(toolBar);
         //
 
-        MPanel panel = new MPanel();
+        /*
+         * Panel with text editor
+         */
+
+        TextPanel panel = new TextPanel();
         add(panel);
     }
     public static final int DEF_WIDTH = 600;
@@ -100,11 +124,18 @@ class WndFrame extends JFrame {
 
 
 
-class MPanel extends JPanel {
+class TextPanel extends JPanel {
     /**
      *
      */
-    private static final long serialVersionUID = 1L;
+    private Caret caret = new Caret();
+
+    public TextPanel() {
+
+    }
+
+
+    /*private static final long serialVersionUID = 1L;
     JButton button1 = new JButton("Yellow");
     JButton button2 = new JButton("Black");
 
@@ -142,9 +173,9 @@ class MPanel extends JPanel {
 
         //button1.setSize(100, 20);
         //button2.setSize(100, 20);
-		/*JDialog jf = new JDialog();
+		// /*JDialog jf = new JDialog();
 		jf.setVisible(true);
-		jf.setSize(300,	100);*/
+		jf.setSize(300,	100);// /*
         add(button1);
         add(button2);
 
@@ -153,5 +184,5 @@ class MPanel extends JPanel {
 
         button1.addActionListener(action1);
         button2.addActionListener(action2);
-    }
+    }*/
 }
