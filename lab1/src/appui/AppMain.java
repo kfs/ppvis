@@ -128,7 +128,7 @@ class TextPanel extends JPanel implements UIComponent {
     /**
      *
      */
-    private Caret caret = new Caret();
+    private Caret caret = Caret.Instance();
 
     public TextPanel() {
 
