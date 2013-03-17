@@ -124,7 +124,7 @@ class WndFrame extends JFrame {
 
 
 
-class TextPanel extends JPanel {
+class TextPanel extends JPanel implements UIComponent {
     /**
      *
      */
@@ -134,6 +134,12 @@ class TextPanel extends JPanel {
 
     }
 
+    public void resize() {
+
+    }
+    public void draw() {
+
+    }
 
     /*private static final long serialVersionUID = 1L;
     JButton button1 = new JButton("Yellow");

@@ -8,19 +8,13 @@ package appui;
  * To change this template use File | Settings | File Templates.
  */
 public class Caret {
-    private static Caret _instance;
+    private static Caret _instance = new Caret();
     private int pos;
     private int line;
-    public Caret() {
-        Instance();
+    private Caret() {
+        //Instance
     }
-    public Caret Instance() {
-        if (_instance == null)
-        {
-            _instance = new Caret();
-            pos = 0;
-            line = 0;
-        }
+    public static Caret Instance() {
         return _instance;
     }
 

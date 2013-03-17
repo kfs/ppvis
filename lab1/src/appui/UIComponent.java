@@ -2,13 +2,12 @@ package appui;
 
 /**
  * Created with IntelliJ IDEA.
- * User: lgsferry
- * Date: 15.03.13
- * Time: 21:09
+ * User: lgsfe_000
+ * Date: 17.03.13
+ * Time: 12:18
  * To change this template use File | Settings | File Templates.
  */
-
-
-public class UIDecorator {
-
+public interface UIComponent {
+    void draw();
+    void resize();
 }
