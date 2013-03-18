@@ -27,7 +27,7 @@ public class TextPanel extends JPanel implements UIComponent {
 
     private Font f = new Font("Serif", Font.BOLD, 14);
 
-    Map<Integer, appui.dom.Character> _chars = new HashMap<Integer, appui.dom.Character>();
+    static Map<Integer, appui.dom.Character> _chars = new HashMap<Integer, appui.dom.Character>();
    // this.key
     /*
      * Overloaded Mehods
