@@ -114,26 +114,8 @@ class WndFrame extends JFrame {
          * Panel with text editor
          */
         final TextPanel panel = new TextPanel();
-        addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyPressed(KeyEvent e) {
-                super.keyPressed(e);
-                System.out.println("1");
-                panel.requestFocusInWindow();
-               /* for (Map.Entry<Integer, appui.dom.Character> entry: panel._chars.entrySet()) {
-                    if(entry.getKey() == e.getKeyCode()) {
-                        panel.keyPressedWithValue(entry.getValue());
-                        file.setName("1");
-                        return;
-                    }
-                }
-                appui.dom.Character c = new appui.dom.Character(e.getKeyChar());
-                panel._chars.put(e.getKeyCode(), c);
-                panel.keyPressedWithValue(c);
-                file.setName("2");*/
-            }
-        });
-
+        panel.setFocusable(true);
+        panel.requestFocusInWindow();
         panel.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
@@ -153,7 +135,6 @@ class WndFrame extends JFrame {
                 file.setName("2");
             }
         });
-        panel.requestFocusInWindow();
         add(panel);
 
     }
