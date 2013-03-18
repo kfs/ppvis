@@ -9,13 +9,12 @@
 package appui;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
+import java.awt.event.*;
 import java.awt.font.*;
 import java.awt.geom.*;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.Map;
 
 import javax.swing.*;
 
@@ -64,7 +63,7 @@ class WndFrame extends JFrame {
 
         // Menu item FILE
 
-        JMenu file = new JMenu("File");
+        final JMenu file = new JMenu("File");
         file.setMnemonic(KeyEvent.VK_F);
         menu.add(file);
         JMenuItem mCreate = new JMenuItem("New...", iNew);
@@ -114,81 +113,50 @@ class WndFrame extends JFrame {
         /*
          * Panel with text editor
          */
+        final TextPanel panel = new TextPanel();
+        addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                super.keyPressed(e);
+                System.out.println("1");
+                panel.requestFocusInWindow();
+               /* for (Map.Entry<Integer, appui.dom.Character> entry: panel._chars.entrySet()) {
+                    if(entry.getKey() == e.getKeyCode()) {
+                        panel.keyPressedWithValue(entry.getValue());
+                        file.setName("1");
+                        return;
+                    }
+                }
+                appui.dom.Character c = new appui.dom.Character(e.getKeyChar());
+                panel._chars.put(e.getKeyCode(), c);
+                panel.keyPressedWithValue(c);
+                file.setName("2");*/
+            }
+        });
 
-        TextPanel panel = new TextPanel();
+        panel.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                super.keyPressed(e);
+                System.out.println("2-1");
+                for (Map.Entry<Integer, appui.dom.Character> entry: panel._chars.entrySet()) {
+                    if(entry.getKey() == e.getKeyCode()) {
+                        panel.keyPressedWithValue(entry.getValue());
+                        file.setName("1");
+                        return;
+                    }
+                }
+                System.out.println("2-2");
+                appui.dom.Character c = new appui.dom.Character(e.getKeyChar());
+                panel._chars.put(e.getKeyCode(), c);
+                panel.keyPressedWithValue(c);
+                file.setName("2");
+            }
+        });
+        panel.requestFocusInWindow();
         add(panel);
+
     }
     public static final int DEF_WIDTH = 600;
     public static final int DEF_HEIGHT = 500;
-}
-
-
-
-class TextPanel extends JPanel implements UIComponent {
-    /**
-     *
-     */
-    private Caret caret = Caret.Instance();
-
-    public TextPanel() {
-
-    }
-
-    public void resize() {
-
-    }
-    public void draw() {
-
-    }
-
-    /*private static final long serialVersionUID = 1L;
-    JButton button1 = new JButton("Yellow");
-    JButton button2 = new JButton("Black");
-
-    class BtnClickAction implements ActionListener {
-        public BtnClickAction(Color c) {
-            bgColor = c;
-        }
-        public void actionPerformed(ActionEvent Event) {
-            setBackground(bgColor);
-        }
-        public Color bgColor;
-    }
-
-    Font f = new Font("Serif", Font.BOLD, 14);
-
-    public void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        Graphics2D g2 = (Graphics2D) g;
-        String message = "" + new Date();
-
-        g2.setFont(f);
-        FontRenderContext context = g2.getFontRenderContext();
-        Rectangle2D bounds = f.getStringBounds(message, context);
-
-        double x = (getWidth() - bounds.getWidth()) / 2;
-        double y = (getHeight() - bounds.getHeight()) / 2;
-
-        g2.drawString(message, (float)x, (float)y);
-        g2.setPaint(Color.GRAY);
-
-
-
-
-
-
-        //button1.setSize(100, 20);
-        //button2.setSize(100, 20);
-		// /*JDialog jf = new JDialog();
-		jf.setVisible(true);
-		jf.setSize(300,	100);// /*
-        add(button1);
-        add(button2);
-
-        BtnClickAction action1 = new BtnClickAction(Color.YELLOW);
-        BtnClickAction action2 = new BtnClickAction(Color.BLACK);
-
-        button1.addActionListener(action1);
-        button2.addActionListener(action2);
-    }*/
 }
