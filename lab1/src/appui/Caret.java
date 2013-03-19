@@ -11,6 +11,11 @@ public class Caret {
     private static Caret _instance = new Caret();
     private int pos;
     private int line;
+    private char caretSymbol = '|';
+
+    static final int PLUS_ONE_CHAR = 1;
+    static final int MINUS_ONE_CHAR = -1;
+
     private Caret() {
         //Instance
     }
@@ -31,5 +36,16 @@ public class Caret {
     }
     public int getLine() {
         return  line;
+    }
+    public Caret changePos(int count) {
+        pos += count;
+        return this;
+    }
+    public Caret changeLine(int count) {
+        line += count;
+        return this;
+    }
+    public char getCaretSymbol() {
+        return caretSymbol;
     }
 }

@@ -23,5 +23,8 @@ public class Glyph {
     public Glyph current() {}
     public void insert(Glyph glyph) {}
     public void remove() {}*/
+    public char getContent() {
+        return '\0';
+    }
 }
 

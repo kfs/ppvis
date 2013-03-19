@@ -25,7 +25,9 @@ public class TextPanel extends JPanel implements UIComponent {
 
     private Caret caret = Caret.Instance();
 
-    private Font f = new Font("Serif", Font.BOLD, 14);
+    private Map<String, Font> fontMap = new HashMap<String, Font>();
+
+    private Font currentFont = new Font("Serif", Font.BOLD, 14);
 
     static Map<Integer, appui.dom.Character> _chars = new HashMap<Integer, appui.dom.Character>();
    // this.key
@@ -64,6 +66,37 @@ public class TextPanel extends JPanel implements UIComponent {
 
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
+        String buf = new String();
+
+
+        final int horisontalIndent = 2;
+        int indentX = 0;
+        int indentY = 0;
+        Graphics2D g2 = (Graphics2D) g;
+        FontRenderContext context = g2.getFontRenderContext();
+        Rectangle2D bounds;
+        FontMetrics metrics = g.getFontMetrics();
+        //g2.setFont(currentFont);
+        if(document.getCountOfLines() != 0 && document.getLineAt(caret.getLine()).getCountOfChars() != 0) {
+            Line line = document.getLineAt(caret.getLine());
+            //Graphics2D g2 = (Graphics2D) g;
+            //g2.drawString(new String("|"), Document.DEFAULT_INDENT_X + indentX, Document.DEFAULT_INDENT_Y);
+            for(int i = 0; i < line.getCountOfChars(); i++) {
+                //buf += line.getCharAt(i).getCH();
+                buf = "" + line.getCharAt(i).getCH();
+                bounds = g2.getFont().getStringBounds(buf, context);
+
+
+                g2.drawString(buf, Document.DEFAULT_INDENT_X+indentX, Document.DEFAULT_INDENT_Y);
+                indentX += metrics.charWidth(line.getCharAt(i).getCH());
+            }
+            g2.drawString("|", Document.DEFAULT_INDENT_X + indentX, Document.DEFAULT_INDENT_Y);
+
+
+        }
+
+
+        /*
         Graphics2D g2 = (Graphics2D) g;
         String message = "" + new Date();
 
@@ -94,6 +127,6 @@ public class TextPanel extends JPanel implements UIComponent {
 
     public void keyPressedWithValue(appui.dom.Character character) {
         document.insert(caret.getLine(), caret.getPos(), character);
-        System.out.println(character.getCH());
+        caret.changePos(Caret.PLUS_ONE_CHAR);
     }
 }
