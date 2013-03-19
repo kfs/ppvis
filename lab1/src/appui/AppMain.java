@@ -114,35 +114,27 @@ class WndFrame extends JFrame {
         panel.addKeyListener(new KeyAdapter() {
             @Override
             public void keyTyped(KeyEvent e) {
-               /* switch (e.getKeyChar()) {
+                switch (e.getKeyChar()) {
                     case '\b':
-
+                        panel.charDelete();
                         break;
                     case '\u007F':
 
                         break;
                     default:
-
-                }*/
-                //if(e.getKeyChar() == KeyEvent.SHIFT_MASK || e.getKeyCode() == KeyEvent.SHIFT_MASK || e.getKeyCode() == KeyEvent.CTRL_MASK) return;
-               // super.keyPressed(e);
-               // System.out.println("2-1");
-                for (Map.Entry<Integer, appui.dom.Character> entry: panel._chars.entrySet()) {
-                    if(entry.getKey() == (int) e.getKeyChar()) {
-                        panel.keyPressedWithValue(entry.getValue());
-                        //panel.paint(panel.getGraphics());
+                        for (Map.Entry<Integer, appui.dom.Character> entry: panel._chars.entrySet()) {
+                            if(entry.getKey() == (int) e.getKeyChar()) {
+                                panel.keyPressedWithValue(entry.getValue());
+                                //panel.paint(panel.getGraphics());
+                                panel.repaint();
+                                return;
+                            }
+                        }
+                        appui.dom.Character c = new appui.dom.Character(e.getKeyChar());
+                        panel._chars.put( (int)e.getKeyChar(), c);
+                        panel.keyPressedWithValue(c);
                         panel.repaint();
-                        return;
-                    }
                 }
-               // System.out.println("2-2");
-              //  System.out.println((int) e.getKeyChar());
-              //  System.out.println(e.getKeyChar());
-                appui.dom.Character c = new appui.dom.Character(e.getKeyChar());
-                panel._chars.put( (int)e.getKeyChar(), c);
-                panel.keyPressedWithValue(c);
-               // panel.paint(panel.getGraphics());
-                panel.repaint();
             }
             @Override
             public void keyPressed(KeyEvent e) {

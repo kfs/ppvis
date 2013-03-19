@@ -129,4 +129,9 @@ public class TextPanel extends JPanel implements UIComponent {
         document.insert(caret.getLine(), caret.getPos(), character);
         caret.changePos(Caret.PLUS_ONE_CHAR);
     }
+    public void charDelete() {
+        document.getLineAt(caret.getLine()).deleteCharAt(caret.getPos() - 1);
+        caret.changePos(Caret.MINUS_ONE_CHAR);
+        repaint();
+    }
 }
