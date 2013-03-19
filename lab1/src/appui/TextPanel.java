@@ -94,5 +94,6 @@ public class TextPanel extends JPanel implements UIComponent {
 
     public void keyPressedWithValue(appui.dom.Character character) {
         document.insert(caret.getLine(), caret.getPos(), character);
+        System.out.println(character.getCH());
     }
 }

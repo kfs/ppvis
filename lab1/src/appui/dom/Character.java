@@ -9,7 +9,9 @@ package appui.dom;
  */
 public class Character extends Glyph {
     private char _character;
-
+    public char getCH() {
+        return _character;
+    }
     public Character(char _char) {
         _character = _char;
     }

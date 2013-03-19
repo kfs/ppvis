@@ -8,12 +8,7 @@
 
 package appui;
 
-import java.awt.*;
 import java.awt.event.*;
-import java.awt.font.*;
-import java.awt.geom.*;
-import java.util.Date;
-import java.util.Iterator;
 import java.util.Map;
 
 import javax.swing.*;
@@ -118,21 +113,22 @@ class WndFrame extends JFrame {
         panel.requestFocusInWindow();
         panel.addKeyListener(new KeyAdapter() {
             @Override
-            public void keyPressed(KeyEvent e) {
-                super.keyPressed(e);
-                System.out.println("2-1");
+            public void keyTyped(KeyEvent e) {
+                //if(e.getKeyChar() == KeyEvent.SHIFT_MASK || e.getKeyCode() == KeyEvent.SHIFT_MASK || e.getKeyCode() == KeyEvent.CTRL_MASK) return;
+               // super.keyPressed(e);
+               // System.out.println("2-1");
                 for (Map.Entry<Integer, appui.dom.Character> entry: panel._chars.entrySet()) {
-                    if(entry.getKey() == e.getKeyCode()) {
+                    if(entry.getKey() == (int) e.getKeyChar()) {
                         panel.keyPressedWithValue(entry.getValue());
-                        file.setName("1");
                         return;
                     }
                 }
-                System.out.println("2-2");
+               // System.out.println("2-2");
+              //  System.out.println((int) e.getKeyChar());
+              //  System.out.println(e.getKeyChar());
                 appui.dom.Character c = new appui.dom.Character(e.getKeyChar());
-                panel._chars.put(e.getKeyCode(), c);
+                panel._chars.put( (int)e.getKeyChar(), c);
                 panel.keyPressedWithValue(c);
-                file.setName("2");
             }
         });
         add(panel);
