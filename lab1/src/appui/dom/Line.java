@@ -41,6 +41,9 @@ public class Line extends Glyph {
         toLine.line.subList(0, from).clear();
         line.subList(from, to).clear();
     }
+    public void concatLines(Line concatLine) {
+        line.addAll(concatLine.line);
+    }
     public int getMaxHeight() {
         // ... calculate maxHeight -  height(H) of each char in the line - maxH = H > maxH ? H : maxH; ...
         return maxHeight;

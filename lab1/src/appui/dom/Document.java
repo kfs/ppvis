@@ -15,12 +15,8 @@ public class Document {
     public static final int DEFAULT_INDENT_Y = 15;
 
     public Document() {
-        _lines.add(new Line(DEFAULT_INDENT_Y));
+        _lines.add(new Line());
     }
-    public void keyPressed(char _char) {
-
-    }
-
     public void insert(int line, int pos, Character character) {
         _lines.elementAt(line).insertCharAt(pos, character);
     }
@@ -36,5 +32,4 @@ public class Document {
     public void deleteLineAt(int pos) {
         _lines.remove(pos);
     }
-
 }

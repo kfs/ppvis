@@ -72,35 +72,35 @@ public class TextPanel extends JPanel implements UIComponent {
         final int horisontalIndent = 2;
         int indentX = 0;
         int indentY = 0;
+        int caretIndentX = 0;
         Graphics2D g2 = (Graphics2D) g;
         FontRenderContext context = g2.getFontRenderContext();
         Rectangle2D bounds;
         FontMetrics metrics = g.getFontMetrics();
         //g2.setFont(currentFont);
-        if(document.getCountOfLines() != 0 /*&& document.getLineAt(caret.getLine()).getCountOfChars() != 0*/) {
-            for (int j = 0; j < document.getCountOfLines(); j++, indentY += 15) {
-                indentX = 0;
+        for (int j = 0; j < document.getCountOfLines(); j++, indentY += 15) {
+            indentX = 0;
                 ///indentY += 15; in for loop
-                Line line = document.getLineAt(j);
+            Line line = document.getLineAt(j);
                 //Graphics2D g2 = (Graphics2D) g;
                 //g2.drawString(new String("|"), Document.DEFAULT_INDENT_X + indentX, Document.DEFAULT_INDENT_Y);
-                for(int i = 0; i < line.getCountOfChars(); i++) {
-                    //buf += line.getCharAt(i).getCH();
-                    buf = "" + line.getCharAt(i).getCH();
-                    bounds = g2.getFont().getStringBounds(buf, context);
+            for(int i = 0; i < line.getCountOfChars(); i++) {
+                //buf += line.getCharAt(i).getCH();
+                buf = "" + line.getCharAt(i).getCH();
+                bounds = g2.getFont().getStringBounds(buf, context);
 
 
-                    g2.drawString(buf, Document.DEFAULT_INDENT_X+indentX, Document.DEFAULT_INDENT_Y+indentY);
-                    indentX += metrics.charWidth(line.getCharAt(i).getCH());
+                g2.drawString(buf, Document.DEFAULT_INDENT_X+indentX, Document.DEFAULT_INDENT_Y+indentY);
+                indentX += metrics.charWidth(line.getCharAt(i).getCH());
+                if(j == caret.getLine() && i+1 == caret.getPos()) {
+                    caretIndentX = indentX;
                 }
             }
-            g2.drawString("|", Document.DEFAULT_INDENT_X + indentX, Document.DEFAULT_INDENT_Y + caret.getLine() * 15);
+        }
+        g2.drawString("|", Document.DEFAULT_INDENT_X + caretIndentX, Document.DEFAULT_INDENT_Y + caret.getLine() * 15);
 
 
-        }
-        else {
-            g2.drawString("|", Document.DEFAULT_INDENT_X + indentX, Document.DEFAULT_INDENT_Y + caret.getLine() * 15);
-        }
+
 
 
         /*
@@ -139,6 +139,10 @@ public class TextPanel extends JPanel implements UIComponent {
     public void charDelete() {
         if(caret.getLine() != 0 && caret.getPos() == 0 && document.getLineAt(caret.getLine()).getCountOfChars() != 0) {
             /// concat prev and current lines here
+            caret.setPos(document.getLineAt(caret.getLine()-1).getCountOfChars());
+            document.getLineAt(caret.getLine()-1).concatLines(document.getLineAt(caret.getLine()));
+            document.deleteLineAt(caret.getLine());
+            caret.changeLine(Caret.MINUS_ONE_CHAR);
         }
         else if(caret.getPos() == 0 && caret.getLine() != 0) {
             document.deleteLineAt(caret.getLine());
@@ -170,5 +174,10 @@ public class TextPanel extends JPanel implements UIComponent {
     }
     public void changeCaretPos(int pos) {
         caret.setPos(pos);
+        repaint();
+    }
+    public void  changeCaretLine(int count) {
+        caret.changeLine(count);
+        repaint();
     }
 }
