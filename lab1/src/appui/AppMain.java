@@ -122,7 +122,7 @@ class WndFrame extends JFrame {
                         break;
                     case '\u007F':
                         //just for test
-                        panel.changeCaretPos(3);
+                        //panel.changeCaretPos(3);
                         //just for test
                         break;
                     case '\n':
@@ -146,6 +146,20 @@ class WndFrame extends JFrame {
             @Override
             public void keyPressed(KeyEvent e) {
                 // VK_RIGHT, VK_LEFT, VK_TOP, VK_DOWN events HERE.
+                switch (e.getKeyCode()) {
+                    case KeyEvent.VK_UP:
+                        panel.changeCaretLine(Caret.MINUS_ONE_CHAR);
+                        break;
+                    case KeyEvent.VK_DOWN:
+                        panel.changeCaretLine(Caret.PLUS_ONE_CHAR);
+                        break;
+                    case KeyEvent.VK_LEFT:
+                        panel.changeCaretPos(Caret.MINUS_ONE_CHAR);
+                        break;
+                    case KeyEvent.VK_RIGHT:
+                        panel.changeCaretPos(Caret.PLUS_ONE_CHAR);
+                        break;
+                }
             }
         });
         add(panel);

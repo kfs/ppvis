@@ -11,7 +11,7 @@ import java.util.Vector;
  */
 public class Document {
     private Vector<Line> _lines = new Vector<Line>();
-    public static final int DEFAULT_INDENT_X = 10;
+    public static final int DEFAULT_INDENT_X = 7;
     public static final int DEFAULT_INDENT_Y = 15;
 
     public Document() {

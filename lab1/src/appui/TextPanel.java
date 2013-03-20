@@ -6,7 +6,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.font.FontRenderContext;
 import java.awt.geom.Rectangle2D;
-import java.util.Date;
+import java.lang.Character;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,7 +27,9 @@ public class TextPanel extends JPanel implements UIComponent {
 
     private Map<String, Font> fontMap = new HashMap<String, Font>();
 
-    private Font currentFont = new Font("Serif", Font.BOLD, 14);
+    private Font currentFont = new Font("Arial", Font.PLAIN, 15);
+
+    //private Font caretFont = new Font()
 
     static Map<Integer, appui.dom.Character> _chars = new HashMap<Integer, appui.dom.Character>();
    // this.key
@@ -97,9 +99,13 @@ public class TextPanel extends JPanel implements UIComponent {
                 }
             }
         }
-        g2.drawString("|", Document.DEFAULT_INDENT_X + caretIndentX, Document.DEFAULT_INDENT_Y + caret.getLine() * 15);
-
-
+        Color defaultFC = g2.getColor();
+        Font defaultFont = g2.getFont();
+        g2.setFont(currentFont);
+        g2.setColor(Color.LIGHT_GRAY);
+        g2.drawString(Character.toString(caret.getCaretSymbol()), Document.DEFAULT_INDENT_X + caretIndentX, Document.DEFAULT_INDENT_Y + caret.getLine() * 15);
+        g2.setColor(defaultFC);
+        g2.setFont(defaultFont);
 
 
 
@@ -139,7 +145,7 @@ public class TextPanel extends JPanel implements UIComponent {
     public void charDelete() {
         if(caret.getLine() != 0 && caret.getPos() == 0 && document.getLineAt(caret.getLine()).getCountOfChars() != 0) {
             /// concat prev and current lines here
-            caret.setPos(document.getLineAt(caret.getLine()-1).getCountOfChars());
+            caret.setPos(document.getLineAt(caret.getLine() - 1).getCountOfChars());
             document.getLineAt(caret.getLine()-1).concatLines(document.getLineAt(caret.getLine()));
             document.deleteLineAt(caret.getLine());
             caret.changeLine(Caret.MINUS_ONE_CHAR);
@@ -173,7 +179,7 @@ public class TextPanel extends JPanel implements UIComponent {
         repaint();
     }
     public void changeCaretPos(int pos) {
-        caret.setPos(pos);
+        caret.changePos(pos);
         repaint();
     }
     public void  changeCaretLine(int count) {
