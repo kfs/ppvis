@@ -75,33 +75,37 @@ public class TextPanel extends JPanel implements UIComponent {
         int indentX = 0;
         int indentY = 0;
         int caretIndentX = 0;
+        final int margin = 1;
         Graphics2D g2 = (Graphics2D) g;
         FontRenderContext context = g2.getFontRenderContext();
         Rectangle2D bounds;
         FontMetrics metrics = g.getFontMetrics();
-        //g2.setFont(currentFont);
+
+        g2.setFont(currentFont);
         for (int j = 0; j < document.getCountOfLines(); j++, indentY += 15) {
             indentX = 0;
                 ///indentY += 15; in for loop
             Line line = document.getLineAt(j);
+
                 //Graphics2D g2 = (Graphics2D) g;
                 //g2.drawString(new String("|"), Document.DEFAULT_INDENT_X + indentX, Document.DEFAULT_INDENT_Y);
             for(int i = 0; i < line.getCountOfChars(); i++) {
                 //buf += line.getCharAt(i).getCH();
-                buf = "" + line.getCharAt(i).getCH();
+                buf = Character.toString(line.getCharAt(i).getCH());
                 bounds = g2.getFont().getStringBounds(buf, context);
 
 
                 g2.drawString(buf, Document.DEFAULT_INDENT_X+indentX, Document.DEFAULT_INDENT_Y+indentY);
-                indentX += metrics.charWidth(line.getCharAt(i).getCH());
+                indentX += metrics.charWidth(line.getCharAt(i).getCH()) + margin;
                 if(j == caret.getLine() && i+1 == caret.getPos()) {
-                    caretIndentX = indentX;
+                    caretIndentX = indentX - margin;
                 }
             }
         }
         Color defaultFC = g2.getColor();
         Font defaultFont = g2.getFont();
         g2.setFont(currentFont);
+
         g2.setColor(Color.LIGHT_GRAY);
         g2.drawString(Character.toString(caret.getCaretSymbol()), Document.DEFAULT_INDENT_X + caretIndentX, Document.DEFAULT_INDENT_Y + caret.getLine() * 15);
         g2.setColor(defaultFC);
@@ -178,12 +182,36 @@ public class TextPanel extends JPanel implements UIComponent {
         }
         repaint();
     }
-    public void changeCaretPos(int pos) {
-        caret.changePos(pos);
+    public void changeCaretPos(int count) {
+        if(caret.isSetSingleOut()) caret.setSingleOutFlag(false);
+        caret.changePos(count);
         repaint();
     }
     public void  changeCaretLine(int count) {
+        if(caret.isSetSingleOut()) caret.setSingleOutFlag(false);
         caret.changeLine(count);
+        repaint();
+    }
+    public void singleOutPos(int count) {
+        if(!caret.isSetSingleOut()) {
+            caret.setSingleOutFlag(true);
+            caret.setSingleOutStartPos(caret.getPos());
+            caret.setSingleOutStartLine(caret.getLine());
+            caret.setSingleOutEndLine(caret.getLine());
+        }
+        caret.changePos(count);
+        caret.setSingleOutEndPos(caret.getPos());
+        repaint();
+    }
+    public void singleOutLine(int count) {
+        if(!caret.isSetSingleOut()) {
+            caret.setSingleOutFlag(true);
+            caret.setSingleOutStartPos(caret.getPos());
+            caret.setSingleOutStartLine(caret.getLine());
+            caret.setSingleOutEndPos(caret.getPos());
+        }
+        caret.changeLine(count);
+        caret.setSingleOutEndPos(caret.getPos());
         repaint();
     }
 }

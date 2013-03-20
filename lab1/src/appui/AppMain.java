@@ -146,19 +146,37 @@ class WndFrame extends JFrame {
             @Override
             public void keyPressed(KeyEvent e) {
                 // VK_RIGHT, VK_LEFT, VK_TOP, VK_DOWN events HERE.
-                switch (e.getKeyCode()) {
-                    case KeyEvent.VK_UP:
-                        panel.changeCaretLine(Caret.MINUS_ONE_CHAR);
-                        break;
-                    case KeyEvent.VK_DOWN:
-                        panel.changeCaretLine(Caret.PLUS_ONE_CHAR);
-                        break;
-                    case KeyEvent.VK_LEFT:
-                        panel.changeCaretPos(Caret.MINUS_ONE_CHAR);
-                        break;
-                    case KeyEvent.VK_RIGHT:
-                        panel.changeCaretPos(Caret.PLUS_ONE_CHAR);
-                        break;
+                if(e.isShiftDown()) {
+                    switch (e.getKeyCode()) {
+                        case KeyEvent.VK_UP:
+                            panel.singleOutLine(Caret.MINUS_ONE_CHAR);
+                            break;
+                        case KeyEvent.VK_DOWN:
+                            panel.singleOutLine(Caret.PLUS_ONE_CHAR);
+                            break;
+                        case KeyEvent.VK_LEFT:
+                            panel.singleOutPos(Caret.MINUS_ONE_CHAR);
+                            break;
+                        case KeyEvent.VK_RIGHT:
+                            panel.singleOutPos(Caret.PLUS_ONE_CHAR);
+                            break;
+                    }
+                }
+                else {
+                    switch (e.getKeyCode()) {
+                        case KeyEvent.VK_UP:
+                            panel.changeCaretLine(Caret.MINUS_ONE_CHAR);
+                            break;
+                        case KeyEvent.VK_DOWN:
+                            panel.changeCaretLine(Caret.PLUS_ONE_CHAR);
+                            break;
+                        case KeyEvent.VK_LEFT:
+                            panel.changeCaretPos(Caret.MINUS_ONE_CHAR);
+                            break;
+                        case KeyEvent.VK_RIGHT:
+                            panel.changeCaretPos(Caret.PLUS_ONE_CHAR);
+                            break;
+                    }
                 }
             }
         });

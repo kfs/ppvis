@@ -12,6 +12,11 @@ public class Caret {
     private int pos;
     private int line;
     private char caretSymbol = '|';
+    private int singleOutStartPos;
+    private int singleOutEndPos;
+    private int singleOutStartLine;
+    private int singleOutEndLine;
+    private boolean singleOutFlag;
 
     static final int PLUS_ONE_CHAR = 1;
     static final int MINUS_ONE_CHAR = -1;
@@ -24,7 +29,9 @@ public class Caret {
     }
 
     // Interface
-
+    public char getCaretSymbol() {
+        return caretSymbol;
+    }
     public void setPos(int p) {
         pos = p;
     }
@@ -37,6 +44,7 @@ public class Caret {
     public int getLine() {
         return  line;
     }
+    // navigation
     public Caret changePos(int count) {
         pos += count;
         return this;
@@ -45,7 +53,24 @@ public class Caret {
         line += count;
         return this;
     }
-    public char getCaretSymbol() {
-        return caretSymbol;
+
+    // text selection
+    public boolean isSetSingleOut() {
+        return singleOutFlag;
+    }
+    public void setSingleOutFlag(boolean state) {
+        singleOutFlag = state;
+    }
+    public void setSingleOutStartPos(int soPos) {
+        singleOutStartPos = soPos;
+    }
+    public void setSingleOutEndPos(int soPos) {
+        singleOutEndPos = soPos;
+    }
+    public void setSingleOutStartLine(int soLine) {
+        singleOutStartLine = soLine;
+    }
+    public void setSingleOutEndLine(int soLine) {
+        singleOutEndLine= soLine;
     }
 }
