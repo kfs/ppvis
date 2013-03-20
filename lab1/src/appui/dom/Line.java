@@ -1,5 +1,6 @@
 package appui.dom;
 
+import java.util.Collections;
 import java.util.Vector;
 
 /**
@@ -28,9 +29,17 @@ public class Line extends Glyph {
     }
     public void insertCharAt(int pos, Character character) {
         line.add(pos, character);
+
     }
     public void deleteCharAt(int pos) {
         line.remove(pos);
+    }
+    public void moveCharsFromTo(int from, int to, Line toLine) {
+        //Line temp = new Line();
+        //Collections.copy(this.line, toLine.line);
+        toLine.line = (Vector<Character>)line.clone();
+        toLine.line.subList(0, from).clear();
+        line.subList(from, to).clear();
     }
     public int getMaxHeight() {
         // ... calculate maxHeight -  height(H) of each char in the line - maxH = H > maxH ? H : maxH; ...

@@ -8,6 +8,7 @@
 
 package appui;
 
+import java.awt.*;
 import java.awt.event.*;
 import java.util.Map;
 
@@ -110,6 +111,7 @@ class WndFrame extends JFrame {
          */
         final TextPanel panel = new TextPanel();
         panel.setFocusable(true);
+        panel.setBackground(Color.WHITE);
         panel.requestFocusInWindow();
         panel.addKeyListener(new KeyAdapter() {
             @Override
@@ -119,7 +121,12 @@ class WndFrame extends JFrame {
                         panel.charDelete();
                         break;
                     case '\u007F':
-
+                        //just for test
+                        panel.changeCaretPos(3);
+                        //just for test
+                        break;
+                    case '\n':
+                        panel.newLine();
                         break;
                     default:
                         for (Map.Entry<Integer, appui.dom.Character> entry: panel._chars.entrySet()) {

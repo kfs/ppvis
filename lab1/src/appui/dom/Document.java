@@ -30,5 +30,11 @@ public class Document {
     public Line getLineAt(int pos) {
         return _lines.elementAt(pos);
     }
+    public void insertLineAt(int pos) {
+        _lines.add(pos + 1, new Line());
+    }
+    public void deleteLineAt(int pos) {
+        _lines.remove(pos);
+    }
 
 }
