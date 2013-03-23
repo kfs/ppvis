@@ -1,5 +1,7 @@
 package appui;
 
+import javax.management.ListenerNotFoundException;
+
 /**
  * Created with IntelliJ IDEA.
  * User: lgsferry
@@ -20,6 +22,7 @@ public class Caret {
 
     static final int PLUS_ONE_CHAR = 1;
     static final int MINUS_ONE_CHAR = -1;
+    static final int POS_AT_THE_BEGIN_OF_LINE = 0;
 
     private Caret() {
         //Instance
@@ -72,5 +75,23 @@ public class Caret {
     }
     public void setSingleOutEndLine(int soLine) {
         singleOutEndLine= soLine;
+    }
+    public int getSelectionStartPos() {
+        if(singleOutStartLine==singleOutEndLine) {
+            return singleOutStartPos < singleOutEndPos ? singleOutStartPos : singleOutEndPos;
+        }
+        else return singleOutEndLine > singleOutStartLine ? singleOutStartPos : singleOutEndPos;
+    }
+    public int getSelectionStartLine() {
+        return singleOutEndLine < singleOutStartLine ? singleOutEndLine : singleOutStartLine;
+    }
+    public int getSelectionEndPos() {
+        if(singleOutStartLine==singleOutEndLine) {
+            return singleOutStartPos > singleOutEndPos ? singleOutStartPos : singleOutEndPos;
+        }
+        else return singleOutEndLine > singleOutStartLine ? singleOutEndPos : singleOutStartPos;
+    }
+    public int getSelectionEndLine() {
+        return singleOutEndLine > singleOutStartLine ? singleOutEndLine : singleOutStartLine;
     }
 }

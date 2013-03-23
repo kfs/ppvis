@@ -116,9 +116,12 @@ class WndFrame extends JFrame {
         panel.addKeyListener(new KeyAdapter() {
             @Override
             public void keyTyped(KeyEvent e) {
+                Caret caret = Caret.Instance();
                 switch (e.getKeyChar()) {
                     case '\b':
-                        panel.charDelete();
+                        panel.charDelete(); //handle caret selection
+                        if(caret.isSetSingleOut())
+                            caret.setSingleOutFlag(false);
                         break;
                     case '\u007F':
                         //just for test
@@ -126,7 +129,9 @@ class WndFrame extends JFrame {
                         //just for test
                         break;
                     case '\n':
-                        panel.newLine();
+                        panel.newLine(); //handle caret selection
+                        if(caret.isSetSingleOut())
+                            caret.setSingleOutFlag(false);
                         break;
                     default:
                         for (Map.Entry<Integer, appui.dom.Character> entry: panel._chars.entrySet()) {
