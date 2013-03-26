@@ -1,5 +1,6 @@
 package appui.dom;
 
+import java.awt.*;
 import java.util.Vector;
 
 /**
@@ -17,8 +18,8 @@ public class Document {
     public Document() {
         _lines.add(new Line());
     }
-    public void insert(int line, int pos, Character character) {
-        _lines.elementAt(line).insertCharAt(pos, character);
+    public void insert(int line, int pos, Character character, Font font) {
+        _lines.elementAt(line).insertCharAt(pos, character, font);
     }
     public int getCountOfLines() {
         return _lines.size();

@@ -36,12 +36,14 @@ public class AppMain {
         WndFrame frame = new WndFrame();
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setVisible(true);
-        SFontFrame WnDFONT = new SFontFrame();
+        frame.initPanelUI();
+        //SFontFrame WnDFONT = new SFontFrame();
     }
 }
 
 @SuppressWarnings("serial")
 class WndFrame extends JFrame {
+    TextPanel textPanel;
     public WndFrame() {
 
         /*
@@ -115,7 +117,9 @@ class WndFrame extends JFrame {
         /*
          * Panel with text editor
          */
+
         final TextPanel panel = new TextPanel();
+        textPanel = panel;
         panel.setFocusable(true);
         panel.setBackground(Color.WHITE);
         panel.requestFocusInWindow();
@@ -196,6 +200,9 @@ class WndFrame extends JFrame {
         panel.add(toolBar, BorderLayout.PAGE_START);
         add(panel);
 
+    }
+    public void initPanelUI() {
+        textPanel.initFontInfo();
     }
     public static final int DEF_WIDTH = 600;
     public static final int DEF_HEIGHT = 500;

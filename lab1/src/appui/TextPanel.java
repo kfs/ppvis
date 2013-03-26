@@ -1,6 +1,8 @@
 package appui;
 
 import appui.dom.*;
+import appui.util.FontInfo;
+import appui.util.FontPair;
 
 import javax.swing.*;
 import java.awt.*;
@@ -21,17 +23,17 @@ public class TextPanel extends JPanel implements UIComponent {
     /*
      * Vars
      */
-    private Document document = new Document();
+    protected Document document = new Document();
 
-    private Caret caret = Caret.Instance();
+    protected Caret caret = Caret.Instance();
 
-    private Map<String, Font> fontMap = new HashMap<String, Font>();
+    protected Map<String, Font> fontMap = new HashMap<String, Font>();
 
-    private Font currentFont = new Font("Serif", Font.PLAIN, 15);
+    protected Font currentFont = new Font("Tahoma", Font.BOLD, 22);
 
     //private Font caretFont = new Font()
 
-    static Map<Integer, appui.dom.Character> _chars = new HashMap<Integer, appui.dom.Character>();
+    protected static Map<Integer, appui.dom.Character> _chars = new HashMap<Integer, appui.dom.Character>();
    // this.key
     /*
      * Overloaded Mehods
@@ -49,7 +51,14 @@ public class TextPanel extends JPanel implements UIComponent {
      */
 
     public TextPanel() {
+        //initFontInfo();
+//        getGraphics().setFont(currentFont);
+    }
 
+    public void initFontInfo() {
+        setFont(currentFont);
+        FontInfo.setGraphics(getGraphics());
+        FontInfo.findFont(currentFont);
     }
 
     /*private static final long serialVersionUID = 1L;
@@ -81,6 +90,7 @@ public class TextPanel extends JPanel implements UIComponent {
         FontRenderContext context = g2.getFontRenderContext();
         Rectangle2D bounds;
         FontMetrics metrics = g.getFontMetrics();
+        Font charFont;
 
         g2.setFont(currentFont);
         for (int lineNo = 0; lineNo < document.getCountOfLines(); lineNo++, indentY += 15) {
@@ -95,7 +105,11 @@ public class TextPanel extends JPanel implements UIComponent {
                 appui.dom.Character currentCharacter = line.getCharAt(charNo);
                 char currentChar = currentCharacter.getCH();
                 buf = Character.toString(currentChar);
-                g2.setFont(currentFont);
+                g2.setFont(line.getFont(charNo));
+                FontPair fontPair = FontInfo.findFont(line.getFont(charNo));
+                g2.setFont(fontPair.getFont());
+                metrics = fontPair.getFontMetrics();
+                //g2.setFont(new Font("Serif", 0, 14));
                 //bounds = g2.getFont().getStringBounds(buf, context);
                 //FontRenderContext context = g2.getFontRenderContext();
                 //Rectangle2D bounds = f.getStringBounds(buf, context);
@@ -104,7 +118,10 @@ public class TextPanel extends JPanel implements UIComponent {
                 if(isSelectedChar(charNo, lineNo)) {
                     Color two = g2.getColor();
                     g2.setColor(Color.GREEN);
-                    g2.fillRect(Document.DEFAULT_INDENT_X + indentX, Document.DEFAULT_INDENT_Y+indentY - metrics.getAscent(), g2.getFontMetrics().charWidth(currentChar), 17);
+                    g2.fillRect(Document.DEFAULT_INDENT_X + indentX,
+                                    Document.DEFAULT_INDENT_Y + indentY - g2.getFontMetrics().getHeight() + g2.getFontMetrics().getDescent(),
+                                    g2.getFontMetrics().charWidth(currentChar), g2.getFontMetrics().getHeight()
+                                );
                     g2.setColor(two);
                 }
                 //metrics.str//
@@ -162,7 +179,7 @@ public class TextPanel extends JPanel implements UIComponent {
     }
 
     public void keyPressedWithValue(appui.dom.Character character) {
-        document.insert(caret.getLine(), caret.getPos(), character);
+        document.insert(caret.getLine(), caret.getPos(), character, currentFont);
         caret.changePos(Caret.PLUS_ONE_CHAR);
     }
     public void charDelete() {

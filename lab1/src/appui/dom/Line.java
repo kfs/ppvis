@@ -12,7 +12,7 @@ import java.util.Vector;
  * To change this template use File | Settings | File Templates.
  */
 public class Line extends Glyph {
-    private Vector<Character> line = new Vector<Character>();
+    private Vector<CharFontPair> charFontLine = new Vector<CharFontPair>();
     private int pos;
     private int maxHeight;
     private int posY;
@@ -23,30 +23,32 @@ public class Line extends Glyph {
     }
     //public int getPos() {return pos;}
     public int getCountOfChars() {
-        return line.size();
+        return charFontLine.size();
     }
     public Character getCharAt(int pos) {
-        return line.elementAt(pos);
+        CharFontPair l = charFontLine.get(pos);
+        return l.getChar();
     }
-    public void insertCharAt(int pos, Character character) {
-        line.add(pos, character);
-
+    public void insertCharAt(int pos, Character character, Font font) {
+        charFontLine.add(pos, new CharFontPair(character, font));
     }
     public void deleteCharAt(int pos) {
-        line.remove(pos);
+        charFontLine.remove(pos);
     }
     public void moveCharsFromTo(int from, int to, Line toLine) {
         //Line temp = new Line();
         //Collections.copy(this.line, toLine.line);
-        toLine.line = (Vector<Character>)line.clone();
-        toLine.line.subList(0, from).clear();
-        line.subList(from, to).clear();
+        toLine.charFontLine = (Vector<CharFontPair>)charFontLine.clone();
+        toLine.charFontLine.subList(0, from).clear();
+        charFontLine.subList(from, to).clear();
     }
     public void concatLines(Line concatLine) {
-        line.addAll(concatLine.line);
+        charFontLine.addAll(concatLine.charFontLine);
+    }
+    public void setMaxHeight(int maxH) {
+        maxHeight = maxH;
     }
     public int getMaxHeight() {
-        // ... calculate maxHeight -  height(H) of each char in the line - maxH = H > maxH ? H : maxH; ...
         return maxHeight;
     }
     public void setPosY(int posY) {
@@ -55,10 +57,18 @@ public class Line extends Glyph {
     public int getPosY() {
         return posY;
     }
+    public Font getFont(int pos) {
+        CharFontPair l = charFontLine.get(pos);
+        return l.getCharFont();
+    }
 }
 
 class CharFontPair {
     CharFontPair() {}
+    CharFontPair(Character c, Font f) {
+        character = c;
+        charFont = f;
+    }
     private appui.dom.Character character;
     private Font charFont;
     void setChar(Character c) {
