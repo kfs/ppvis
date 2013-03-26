@@ -1,5 +1,6 @@
 package appui.dom;
 
+import java.awt.*;
 import java.util.Collections;
 import java.util.Vector;
 
@@ -53,5 +54,23 @@ public class Line extends Glyph {
     }
     public int getPosY() {
         return posY;
+    }
+}
+
+class CharFontPair {
+    CharFontPair() {}
+    private appui.dom.Character character;
+    private Font charFont;
+    void setChar(Character c) {
+        character = c;
+    }
+    Character getChar() {
+        return character;
+    }
+    void setCharFont(Font f) {
+        charFont = f;
+    }
+    Font getCharFont() {
+        return charFont;
     }
 }

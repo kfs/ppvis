@@ -8,6 +8,8 @@
 
 package appui;
 
+import appui.util.SFontFrame;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.util.Map;
@@ -16,7 +18,7 @@ import javax.swing.*;
 
 public class AppMain {
     public static void main(String[] args) {
-        /*try {
+        try {
             javax.swing.UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         }
         catch (UnsupportedLookAndFeelException e) {
@@ -30,10 +32,11 @@ public class AppMain {
         }
         catch (IllegalAccessException e) {
             // handle exception
-        }*/
+        }
         WndFrame frame = new WndFrame();
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setVisible(true);
+        SFontFrame WnDFONT = new SFontFrame();
     }
 }
 
@@ -52,7 +55,7 @@ class WndFrame extends JFrame {
          * Menu
          */
 
-        ImageIcon iNew = new ImageIcon(getClass().getResource("16796.ico"));
+        ImageIcon iNew = new ImageIcon("cut.png");
 
         JMenuBar menu = new JMenuBar();
         setJMenuBar(menu);
@@ -103,7 +106,10 @@ class WndFrame extends JFrame {
          */
 
         JToolBar toolBar = new JToolBar("Toolbar");
-        add(toolBar);
+        toolBar.setFloatable(false);
+        toolBar.setRollover(true);
+        toolBar.add(new JButton("asf"));
+
         //
 
         /*
@@ -134,17 +140,19 @@ class WndFrame extends JFrame {
                             caret.setSingleOutFlag(false);
                         break;
                     default:
-                        for (Map.Entry<Integer, appui.dom.Character> entry: panel._chars.entrySet()) {
+                        /*for (Map.Entry<Integer, appui.dom.Character> entry: panel._chars.entrySet()) {
                             if(entry.getKey() == (int) e.getKeyChar()) {
                                 panel.keyPressedWithValue(entry.getValue());
                                 //panel.paint(panel.getGraphics());
                                 panel.repaint();
                                 return;
                             }
-                        }
-                        appui.dom.Character c = new appui.dom.Character(e.getKeyChar());
-                        panel._chars.put( (int)e.getKeyChar(), c);
-                        panel.keyPressedWithValue(c);
+                        }*/
+                        appui.dom.Character character = panel._chars.get((int) e.getKeyChar());
+                        if(character == null) {appui.dom.Character c = new appui.dom.Character(e.getKeyChar()); panel._chars.put((int)e.getKeyChar(), c); character=c;}
+
+                       // panel._chars.put( (int)e.getKeyChar(), c);
+                        panel.keyPressedWithValue(character);
                         panel.repaint();
                 }
             }
@@ -185,6 +193,7 @@ class WndFrame extends JFrame {
                 }
             }
         });
+        panel.add(toolBar, BorderLayout.PAGE_START);
         add(panel);
 
     }
