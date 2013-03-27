@@ -93,7 +93,8 @@ public class TextPanel extends JPanel implements UIComponent {
         Font charFont;
 
         g2.setFont(currentFont);
-        for (int lineNo = 0; lineNo < document.getCountOfLines(); lineNo++, indentY += 15) {
+        int lineHeight = 0;
+        for (int lineNo = 0; lineNo < document.getCountOfLines(); lineNo++, indentY += lineHeight) {                    ///!!!!!! lineHeight
             indentX = 0;
                 ///indentY += 15; in for loop
             Line line = document.getLineAt(lineNo);
@@ -102,6 +103,7 @@ public class TextPanel extends JPanel implements UIComponent {
                 //g2.drawString(new String("|"), Document.DEFAULT_INDENT_X + indentX, Document.DEFAULT_INDENT_Y);
             for(int charNo = 0; charNo < line.getCountOfChars(); charNo++) {
                 //buf += line.getCharAt(charNo).getCH();
+                lineHeight = line.getMaxHeight();
                 appui.dom.Character currentCharacter = line.getCharAt(charNo);
                 char currentChar = currentCharacter.getCH();
                 buf = Character.toString(currentChar);
@@ -120,7 +122,7 @@ public class TextPanel extends JPanel implements UIComponent {
                     g2.setColor(Color.GREEN);
                     g2.fillRect(Document.DEFAULT_INDENT_X + indentX,
                                     Document.DEFAULT_INDENT_Y + indentY - g2.getFontMetrics().getHeight() + g2.getFontMetrics().getDescent(),
-                                    g2.getFontMetrics().charWidth(currentChar), g2.getFontMetrics().getHeight()
+                                    g2.getFontMetrics().charWidth(currentChar), lineHeight
                                 );
                     g2.setColor(two);
                 }
@@ -131,7 +133,7 @@ public class TextPanel extends JPanel implements UIComponent {
                 indentX += g2.getFontMetrics().charWidth(currentChar);
 
                 if(lineNo == caret.getLine() && charNo+1 == caret.getPos()) {
-                    caretIndentX = indentX - margin;
+                    caretIndentX = indentX/* - 2*margin;0*/;
                 }
             }
             if(lineNo == caret.getLine()) {
@@ -143,7 +145,7 @@ public class TextPanel extends JPanel implements UIComponent {
         g2.setFont(currentFont);
 
         g2.setColor(Color.RED);
-        g2.drawString(Character.toString(caret.getCaretSymbol()), Document.DEFAULT_INDENT_X + caretIndentX/* +2*margin*/, Document.DEFAULT_INDENT_Y + caretIndentY);
+        g2.drawString(Character.toString(caret.getCaretSymbol()),/* Document.DEFAULT_INDENT_X + */caretIndentX, Document.DEFAULT_INDENT_Y + caretIndentY);
         g2.setColor(defaultFC);
         g2.setFont(defaultFont);
 

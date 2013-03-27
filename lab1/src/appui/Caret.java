@@ -1,7 +1,5 @@
 package appui;
 
-import javax.management.ListenerNotFoundException;
-
 /**
  * Created with IntelliJ IDEA.
  * User: lgsferry
@@ -10,21 +8,22 @@ import javax.management.ListenerNotFoundException;
  * To change this template use File | Settings | File Templates.
  */
 public class Caret {
-    private static Caret _instance = new Caret();
-    private int pos;
-    private int line;
-    private char caretSymbol = '|';
-    private int singleOutStartPos;
-    private int singleOutEndPos;
-    private int singleOutStartLine;
-    private int singleOutEndLine;
-    private boolean singleOutFlag;
+    protected static Caret _instance = new Caret();
+    protected int pos;
+    protected int visiblePos;
+    protected int line;
+    protected char caretSymbol = '|';
+    protected int singleOutStartPos;
+    protected int singleOutEndPos;
+    protected int singleOutStartLine;
+    protected int singleOutEndLine;
+    protected boolean singleOutFlag;
 
     static final int PLUS_ONE_CHAR = 1;
     static final int MINUS_ONE_CHAR = -1;
     static final int POS_AT_THE_BEGIN_OF_LINE = 0;
 
-    private Caret() {
+    protected Caret() {
         //Instance
     }
     public static Caret Instance() {

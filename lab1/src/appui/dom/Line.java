@@ -1,7 +1,9 @@
 package appui.dom;
 
+import appui.util.FontInfo;
+import appui.util.FontPair;
+
 import java.awt.*;
-import java.util.Collections;
 import java.util.Vector;
 
 /**
@@ -30,10 +32,27 @@ public class Line extends Glyph {
         return l.getChar();
     }
     public void insertCharAt(int pos, Character character, Font font) {
+        FontPair fontPair = FontInfo.findFont(font);
+        int height = fontPair.getFontMetrics().getHeight();
+        if (height>maxHeight) maxHeight = height;
         charFontLine.add(pos, new CharFontPair(character, font));
     }
     public void deleteCharAt(int pos) {
+        CharFontPair charFontPair = charFontLine.get(pos);
+        FontPair fontPair = FontInfo.findFont(charFontPair.getCharFont());
+        int height = fontPair.getFontMetrics().getHeight();
         charFontLine.remove(pos);
+        if(height==maxHeight)
+            calculateLineHeight();
+    }
+    protected void calculateLineHeight() {
+        maxHeight = 0;
+        int height;
+        for(CharFontPair charFontPair : charFontLine) {
+            FontPair font = FontInfo.findFont(charFontPair.getCharFont());
+            height = font.getFontMetrics().getHeight();
+            if(height > maxHeight) maxHeight = height;
+        }
     }
     public void moveCharsFromTo(int from, int to, Line toLine) {
         //Line temp = new Line();
