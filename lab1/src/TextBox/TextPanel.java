@@ -1,8 +1,8 @@
-package appui;
+package TextBox;
 
-import appui.dom.*;
-import appui.util.FontInfo;
-import appui.util.FontPair;
+import TextBox.dom.*;
+import TextBox.util.FontInfo;
+import TextBox.util.FontPair;
 
 import javax.swing.*;
 import java.awt.*;
@@ -29,11 +29,11 @@ public class TextPanel extends JPanel implements UIComponent {
 
     protected Map<String, Font> fontMap = new HashMap<String, Font>();
 
-    protected Font currentFont = new Font("Tahoma", Font.BOLD, 22);
+    protected Font currentFont = new Font("Serif", Font.PLAIN, 15);
 
     //private Font caretFont = new Font()
 
-    protected static Map<Integer, appui.dom.Character> _chars = new HashMap<Integer, appui.dom.Character>();
+    protected static Map<Integer, TextBox.dom.Character> _chars = new HashMap<Integer, TextBox.dom.Character>();
    // this.key
     /*
      * Overloaded Mehods
@@ -90,7 +90,8 @@ public class TextPanel extends JPanel implements UIComponent {
         FontRenderContext context = g2.getFontRenderContext();
         Rectangle2D bounds;
         FontMetrics metrics = g.getFontMetrics();
-        Font charFont;
+        Font caretFont = currentFont;
+        Color selectionColor = new Color(137, 189, 245);
 
         g2.setFont(currentFont);
         int lineHeight = 0;
@@ -104,7 +105,7 @@ public class TextPanel extends JPanel implements UIComponent {
             for(int charNo = 0; charNo < line.getCountOfChars(); charNo++) {
                 //buf += line.getCharAt(charNo).getCH();
                 lineHeight = line.getMaxHeight();
-                appui.dom.Character currentCharacter = line.getCharAt(charNo);
+                TextBox.dom.Character currentCharacter = line.getCharAt(charNo);
                 char currentChar = currentCharacter.getCH();
                 buf = Character.toString(currentChar);
                 g2.setFont(line.getFont(charNo));
@@ -119,10 +120,10 @@ public class TextPanel extends JPanel implements UIComponent {
                 //  Rectangle2D backgroundColRect = new Rectangle(Document.DEFAULT_INDENT_X + indentX, Document.DEFAULT_INDENT_Y + indentY, metrics.charWidth(line.getCharAt(charNo).getCH()), caret.getLine()*15);
                 if(isSelectedChar(charNo, lineNo)) {
                     Color two = g2.getColor();
-                    g2.setColor(Color.GREEN);
+                    g2.setColor(selectionColor);
                     g2.fillRect(Document.DEFAULT_INDENT_X + indentX,
-                                    Document.DEFAULT_INDENT_Y + indentY - g2.getFontMetrics().getHeight() + g2.getFontMetrics().getDescent(),
-                                    g2.getFontMetrics().charWidth(currentChar), lineHeight
+                                Document.DEFAULT_INDENT_Y + indentY - metrics.getHeight() + metrics.getDescent(),
+                                metrics.charWidth(currentChar), lineHeight
                                 );
                     g2.setColor(two);
                 }
@@ -130,10 +131,11 @@ public class TextPanel extends JPanel implements UIComponent {
                 g2.drawString(buf, Document.DEFAULT_INDENT_X+indentX, Document.DEFAULT_INDENT_Y+indentY);
                 //g2.drawString("the most", Document.DEFAULT_INDENT_X, Document.DEFAULT_INDENT_Y+15);
                 //indentX += metrics.charWidth(currentChar)+margin/2;
-                indentX += g2.getFontMetrics().charWidth(currentChar);
+                indentX += metrics.charWidth(currentChar);
 
                 if(lineNo == caret.getLine() && charNo+1 == caret.getPos()) {
                     caretIndentX = indentX/* - 2*margin;0*/;
+                    caretFont = currentFont;
                 }
             }
             if(lineNo == caret.getLine()) {
@@ -142,10 +144,10 @@ public class TextPanel extends JPanel implements UIComponent {
         }
         Color defaultFC = g2.getColor();
         Font defaultFont = g2.getFont();
-        g2.setFont(currentFont);
+        g2.setFont(caretFont);
 
         g2.setColor(Color.RED);
-        g2.drawString(Character.toString(caret.getCaretSymbol()),/* Document.DEFAULT_INDENT_X + */caretIndentX, Document.DEFAULT_INDENT_Y + caretIndentY);
+        g2.drawString(Character.toString(caret.getCaretSymbol()), Document.DEFAULT_INDENT_X + caretIndentX, Document.DEFAULT_INDENT_Y + caretIndentY);
         g2.setColor(defaultFC);
         g2.setFont(defaultFont);
 
@@ -180,7 +182,7 @@ public class TextPanel extends JPanel implements UIComponent {
         //button2.addActionListener(action2);
     }
 
-    public void keyPressedWithValue(appui.dom.Character character) {
+    public void keyPressedWithValue(TextBox.dom.Character character) {
         document.insert(caret.getLine(), caret.getPos(), character, currentFont);
         caret.changePos(Caret.PLUS_ONE_CHAR);
     }
@@ -223,12 +225,19 @@ public class TextPanel extends JPanel implements UIComponent {
         repaint();
     }
     public void changeCaretPos(int count) {
-        if(caret.isSetSingleOut()) caret.setSingleOutFlag(false);
+        if(caret.getVisiblePos() != -1)
+            caret.updateVisiblePos();
+
+        if(caret.isSetSingleOut()) {
+            caret.setSingleOutFlag(false);
+            if((caret.getSelectionStartPos() > caret.getPos() && count > 0) || (caret.getSelectionStartPos() < caret.getPos() && count < 0))
+                caret.setPos(caret.getSelectionStartPos());
+            repaint();
+            return;
+        }
         // left
 
         if(caret.getPos() + count >= 0 && caret.getPos() + count <= document.getLineAt(caret.getLine()).getCountOfChars())
-
-
         // right
             caret.changePos(count);
         else if(caret.getPos() + count < 0 && caret.getLine() > 0) {
@@ -242,9 +251,40 @@ public class TextPanel extends JPanel implements UIComponent {
 
         repaint();
     }
-    public void  changeCaretLine(int count) {
+    public void changeCaretLine(int count) {
         if(caret.isSetSingleOut()) caret.setSingleOutFlag(false);
-        caret.changeLine(count);
+        //caret.changeLine(count);
+
+        //up
+        //up when 1st(0) line
+        if(count < 0 && caret.getLine() == 0)
+            return;
+        //down when last line
+        else if(count > 0 && caret.getLine() == document.getCountOfLines()-1)
+            return;
+        //caret at the middle of lines
+        else {
+            // all good
+            if(caret.getLine() + count <= document.getCountOfLines()-1 && caret.getLine() + count >= 0) {
+                caret.changeLine(count);
+            } // up -  more than exists
+            else if(count < 0) {
+                caret.setLine(0);
+            } // down - more than exists
+            else {
+                caret.setLine(document.getCountOfLines()-1);
+            }
+        }
+        if(caret.getPos() > document.getLineAt(caret.getLine()).getCountOfChars())
+            caret.setVisiblePos(document.getLineAt(caret.getLine()).getCountOfChars());
+        else if(caret.getVisiblePos() != document.getLineAt(caret.getLine()).getCountOfChars()) {
+            if(caret.getPos() > document.getLineAt(caret.getLine()).getCountOfChars()) {
+                caret.setVisiblePos(document.getLineAt(caret.getLine()).getCountOfChars());
+            }
+            else
+                caret.setVisiblePos(-1);
+        }
+        //down
         repaint();
     }
     public void singleOutPos(int count) {
@@ -256,6 +296,7 @@ public class TextPanel extends JPanel implements UIComponent {
         }
         caret.changePos(count);
         caret.setSingleOutEndPos(caret.getPos());
+        caret.setSingleOutFlag(caret.isSelectionActual());
         repaint();
     }
     public void singleOutLine(int count) {
@@ -283,5 +324,8 @@ public class TextPanel extends JPanel implements UIComponent {
             return true;
         else
         return false;
+    }
+    public void updateFont(Font font) {
+        currentFont = font;
     }
 }

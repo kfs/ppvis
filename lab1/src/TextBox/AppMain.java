@@ -6,15 +6,13 @@
  * To change this template use File | Settings | File Templates.
  */
 
-package appui;
-
-import appui.util.SFontFrame;
+package TextBox;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.util.Map;
 
 import javax.swing.*;
+import TextBox.util.SFontFrame;
 
 public class AppMain {
     public static void main(String[] args) {
@@ -37,13 +35,13 @@ public class AppMain {
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setVisible(true);
         frame.initPanelUI();
-        //SFontFrame WnDFONT = new SFontFrame();
     }
 }
 
 @SuppressWarnings("serial")
 class WndFrame extends JFrame {
     TextPanel textPanel;
+    SFontFrame fontChooser = new SFontFrame();
     public WndFrame() {
 
         /*
@@ -103,6 +101,9 @@ class WndFrame extends JFrame {
         edit.add(mCopy);
         edit.add(mPaste);
 
+
+        final TextPanel panel = new TextPanel();
+
         /*
          * Toolbar
          */
@@ -110,7 +111,23 @@ class WndFrame extends JFrame {
         JToolBar toolBar = new JToolBar("Toolbar");
         toolBar.setFloatable(false);
         toolBar.setRollover(true);
-        toolBar.add(new JButton("asf"));
+        toolBar.setOrientation(SwingConstants.HORIZONTAL);
+        JButton jbtn = new JButton("asf");
+        jbtn.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                //fontChooser.setVisible(true);
+                fontChooser.chooseFont(panel);
+                panel.repaint();
+            }
+            @Override
+            public void mouseReleased(MouseEvent e) {
+
+                //panel.repaint();
+            }
+        });
+        jbtn.setFocusable(false);
+        toolBar.add(jbtn);
 
         //
 
@@ -118,11 +135,12 @@ class WndFrame extends JFrame {
          * Panel with text editor
          */
 
-        final TextPanel panel = new TextPanel();
+
         textPanel = panel;
         panel.setFocusable(true);
         panel.setBackground(Color.WHITE);
         panel.requestFocusInWindow();
+        panel.setBorder(BorderFactory.createLineBorder(Color.GRAY));
         panel.addKeyListener(new KeyAdapter() {
             @Override
             public void keyTyped(KeyEvent e) {
@@ -130,7 +148,7 @@ class WndFrame extends JFrame {
                 switch (e.getKeyChar()) {
                     case '\b':
                         panel.charDelete(); //handle caret selection
-                        if(caret.isSetSingleOut())
+                        if (caret.isSetSingleOut())
                             caret.setSingleOutFlag(false);
                         break;
                     case '\u007F':
@@ -140,11 +158,11 @@ class WndFrame extends JFrame {
                         break;
                     case '\n':
                         panel.newLine(); //handle caret selection
-                        if(caret.isSetSingleOut())
+                        if (caret.isSetSingleOut())
                             caret.setSingleOutFlag(false);
                         break;
                     default:
-                        /*for (Map.Entry<Integer, appui.dom.Character> entry: panel._chars.entrySet()) {
+                        /*for (Map.Entry<Integer, TextBox.dom.Character> entry: panel._chars.entrySet()) {
                             if(entry.getKey() == (int) e.getKeyChar()) {
                                 panel.keyPressedWithValue(entry.getValue());
                                 //panel.paint(panel.getGraphics());
@@ -152,18 +170,23 @@ class WndFrame extends JFrame {
                                 return;
                             }
                         }*/
-                        appui.dom.Character character = panel._chars.get((int) e.getKeyChar());
-                        if(character == null) {appui.dom.Character c = new appui.dom.Character(e.getKeyChar()); panel._chars.put((int)e.getKeyChar(), c); character=c;}
+                        TextBox.dom.Character character = panel._chars.get((int) e.getKeyChar());
+                        if (character == null) {
+                            TextBox.dom.Character c = new TextBox.dom.Character(e.getKeyChar());
+                            panel._chars.put((int) e.getKeyChar(), c);
+                            character = c;
+                        }
 
-                       // panel._chars.put( (int)e.getKeyChar(), c);
+                        // panel._chars.put( (int)e.getKeyChar(), c);
                         panel.keyPressedWithValue(character);
                         panel.repaint();
                 }
             }
+
             @Override
             public void keyPressed(KeyEvent e) {
                 // VK_RIGHT, VK_LEFT, VK_TOP, VK_DOWN events HERE.
-                if(e.isShiftDown()) {
+                if (e.isShiftDown()) {
                     switch (e.getKeyCode()) {
                         case KeyEvent.VK_UP:
                             panel.singleOutLine(Caret.MINUS_ONE_CHAR);
@@ -178,8 +201,7 @@ class WndFrame extends JFrame {
                             panel.singleOutPos(Caret.PLUS_ONE_CHAR);
                             break;
                     }
-                }
-                else {
+                } else {
                     switch (e.getKeyCode()) {
                         case KeyEvent.VK_UP:
                             panel.changeCaretLine(Caret.MINUS_ONE_CHAR);
@@ -197,8 +219,12 @@ class WndFrame extends JFrame {
                 }
             }
         });
-        panel.add(toolBar, BorderLayout.PAGE_START);
-        add(panel);
+        //panel.add(toolBar, BorderLayout.PAGE_START);
+        add(toolBar,BorderLayout.PAGE_START);
+        JScrollPane sp = new JScrollPane(panel);
+        sp.setBorder(null);
+        add(sp);
+        panel.requestFocusInWindow();
 
     }
     public void initPanelUI() {

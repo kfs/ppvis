@@ -1,4 +1,4 @@
-package appui;
+package TextBox;
 
 /**
  * Created with IntelliJ IDEA.

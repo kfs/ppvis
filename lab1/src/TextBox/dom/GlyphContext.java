@@ -1,6 +1,4 @@
-package appui.dom;
-
-import java.awt.*;
+package TextBox.dom;
 
 /**
  * Created with IntelliJ IDEA.

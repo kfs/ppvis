@@ -1,4 +1,4 @@
-package appui.dom;
+package TextBox.dom;
 
 import java.awt.*;
 import java.util.Vector;

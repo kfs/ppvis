@@ -1,7 +1,11 @@
-package appui.util;
+package TextBox.util;
+
+import TextBox.TextPanel;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 /**
  * Created with IntelliJ IDEA.
@@ -18,6 +22,7 @@ public class SFontFrame extends JFrame {
     protected JButton btnCancel;
     protected JCheckBox chkBold;
     protected JCheckBox chkItalic;
+    protected TextPanel textView;
 
     protected boolean boldFlag;
     protected boolean italicFlag;
@@ -32,6 +37,7 @@ public class SFontFrame extends JFrame {
     public SFontFrame() {
         setSize(250, 300);
         setTitle("Font Chooser...");
+        setResizable(false);
         setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
         init();
     }
@@ -49,6 +55,35 @@ public class SFontFrame extends JFrame {
         //sizeList.add(sp = new JScrollPane());
        // sp.createVerticalScrollBar();
         btnApply = new JButton("Apply");
+        btnApply.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                String fontName = fontList.getSelectedValue().toString();
+                int style;
+                int size = Integer.parseInt(sizeList.getSelectedValue().toString());
+
+                if(chkBold.isSelected() && chkItalic.isSelected())
+                    style = Font.BOLD + Font.ITALIC;
+                else if(chkBold.isSelected())
+                    style = Font.BOLD;
+                else if(chkItalic.isSelected())
+                    style = Font.ITALIC;
+                else
+                    style = Font.PLAIN;
+                resultFontID = fontName + '-' + style + '-' + size;
+                System.out.println(resultFontID);
+                FontPair fontPair = FontInfo.findFont(resultFontID);
+                if(fontPair == null) {
+                    resultFont = new Font(fontName, style, size);
+                    FontInfo.addFont(resultFont, resultFontID);
+                }
+                else
+                    resultFont = fontPair.getFont();
+
+                setVisible(false);
+                textView.updateFont(resultFont);
+            }
+        });
         btnCancel = new JButton("Cancel");
         chkBold = new JCheckBox("Bold");
         chkItalic = new JCheckBox("Italic");
@@ -88,6 +123,10 @@ public class SFontFrame extends JFrame {
 
         );
         add(panel);
+        //setVisible(true);
+    }
+    public void chooseFont(TextPanel textPanel) {
+        textView = textPanel;
         setVisible(true);
     }
 }

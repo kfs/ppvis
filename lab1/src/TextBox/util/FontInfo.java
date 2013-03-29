@@ -1,6 +1,4 @@
-package appui.util;
-
-import appui.util.FontPair;
+package TextBox.util;
 
 import java.awt.*;
 import java.util.HashMap;
@@ -41,6 +39,18 @@ public class FontInfo {
             return fontPair;
         }
         else return searchResult;
+    }
+    public static FontPair findFont(String fontID) {
+        return fontMap.get(fontID);
+    }
+    public static FontPair addFont(Font font, String fontID) {
+        Font currentFont = graphics.getFont();
+        graphics.setFont(font);
+        FontMetrics newFM = graphics.getFontMetrics();
+        FontPair fontPair = new FontPair(newFM, font);
+        fontMap.put(fontID, fontPair);
+        graphics.setFont(currentFont);
+        return fontPair;
     }
     public static void setGraphics(Graphics g) {
         graphics = g;

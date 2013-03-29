@@ -1,7 +1,4 @@
-package appui.dom;
-
-import appui.TextPanel;
-import java.awt.Point;
+package TextBox.dom;
 
 /**
  * Created with IntelliJ IDEA.

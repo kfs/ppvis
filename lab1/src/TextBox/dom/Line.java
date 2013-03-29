@@ -1,7 +1,7 @@
-package appui.dom;
+package TextBox.dom;
 
-import appui.util.FontInfo;
-import appui.util.FontPair;
+import TextBox.util.FontInfo;
+import TextBox.util.FontPair;
 
 import java.awt.*;
 import java.util.Vector;
@@ -60,6 +60,8 @@ public class Line extends Glyph {
         toLine.charFontLine = (Vector<CharFontPair>)charFontLine.clone();
         toLine.charFontLine.subList(0, from).clear();
         charFontLine.subList(from, to).clear();
+        calculateLineHeight();
+        toLine.calculateLineHeight();
     }
     public void concatLines(Line concatLine) {
         charFontLine.addAll(concatLine.charFontLine);
@@ -88,7 +90,7 @@ class CharFontPair {
         character = c;
         charFont = f;
     }
-    private appui.dom.Character character;
+    private TextBox.dom.Character character;
     private Font charFont;
     void setChar(Character c) {
         character = c;

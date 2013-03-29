@@ -1,4 +1,4 @@
-package appui;
+package TextBox;
 
 /**
  * Created with IntelliJ IDEA.
@@ -10,7 +10,7 @@ package appui;
 public class Caret {
     protected static Caret _instance = new Caret();
     protected int pos;
-    protected int visiblePos;
+    protected int visiblePos = -1;
     protected int line;
     protected char caretSymbol = '|';
     protected int singleOutStartPos;
@@ -41,7 +41,10 @@ public class Caret {
         line = l;
     }
     public int getPos() {
-        return pos;
+        if(visiblePos < 0)
+            return pos;
+        else
+            return visiblePos;
     }
     public int getLine() {
         return  line;
@@ -54,6 +57,16 @@ public class Caret {
     public Caret changeLine(int count) {
         line += count;
         return this;
+    }
+    public void updateVisiblePos() {
+        pos = visiblePos;
+        visiblePos = -1;
+    }
+    public int getVisiblePos() {
+        return visiblePos;
+    }
+    public void setVisiblePos(int vPos) {
+        visiblePos = vPos;
     }
 
     // text selection
@@ -77,7 +90,9 @@ public class Caret {
     }
     public int getSelectionStartPos() {
         if(singleOutStartLine==singleOutEndLine) {
-            return singleOutStartPos < singleOutEndPos ? singleOutStartPos : singleOutEndPos;
+            if(isSetSingleOut())
+                return singleOutStartPos < singleOutEndPos ? singleOutStartPos : singleOutEndPos;
+            else return singleOutStartPos;
         }
         else return singleOutEndLine > singleOutStartLine ? singleOutStartPos : singleOutEndPos;
     }
@@ -92,5 +107,8 @@ public class Caret {
     }
     public int getSelectionEndLine() {
         return singleOutEndLine > singleOutStartLine ? singleOutEndLine : singleOutStartLine;
+    }
+    public boolean isSelectionActual() {
+        return !(singleOutStartPos == singleOutEndPos && singleOutStartLine == singleOutEndLine);
     }
 }
