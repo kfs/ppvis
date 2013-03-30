@@ -1,19 +1,12 @@
 package TextBox.dom;
 
+import TextBox.util.CharacterFactory;
+
 import java.awt.*;
 import java.util.Vector;
 
-/**
- * Created with IntelliJ IDEA.
- * User: lgsferry
- * Date: 18.03.13
- * Time: 17:47
- * To change this template use File | Settings | File Templates.
- */
 public class Document {
     private Vector<Line> _lines = new Vector<Line>();
-    public static final int DEFAULT_INDENT_X = 7;
-    public static final int DEFAULT_INDENT_Y = 15;
 
     public Document() {
         Line line = new Line();
@@ -39,6 +32,8 @@ public class Document {
     }
     public String copySelectedString(int startPos, int startLine, int endPos, int endLine) {
         String temp = "";
+        if(startLine == endLine && startPos == endPos) return temp;
+
         for(int currentLine = startLine; currentLine <= endLine; currentLine++ ) {
             Line strLine = _lines.get(currentLine);
             int countOfChars = strLine.getCountOfChars();
@@ -55,11 +50,55 @@ public class Document {
     }
     public String cutSelectedString(int startPos, int startLine, int endPos, int endLine) {
         String temp = "";
+        if(startLine == endLine && startPos == endPos) return temp;
 
+        for(int currentLine = startLine; currentLine <= endLine; ) {
+            Line strLine = _lines.get(currentLine);
+            int countOfChars = strLine.getCountOfChars();
+            int endLineSymbol = (currentLine == endLine ? endPos : countOfChars);
+            for(int currentPos = currentLine == startLine ? startPos : 0 ;
+                currentPos < endLineSymbol ;
+                endLineSymbol--) {
+                char currentChar = strLine.getCharAt(currentPos).getCH();
+                strLine.deleteCharAt(currentPos);
+                temp += java.lang.Character.toString(currentChar);
+            }
+            if(currentLine != endLine) temp += '\n';
+            if(currentLine == endLine && startLine != endLine) {
+                _lines.get(currentLine + TextBoxConstants.PREV_POS_MARKER).concatLines(_lines.get(currentLine));
+                deleteLineAt(currentLine);
+            }
+            if(currentLine != startLine && currentLine != endLine) {
+                deleteLineAt(currentLine);
+                endLine--;
+            }
+            else
+                currentLine++;
+        }
 
         return temp;
     }
-    public void pasteSelectedString(int pos, int line, String string) {
+    public int[] pasteSelectedString(int pos, int line, String string) {
+        int[] state = new int[2];
+        int stringPos;
+        int stringLength = string.length();
+        char symbol;
 
+        for (stringPos = 0; stringPos < stringLength; stringPos++) {
+            symbol = string.charAt(stringPos);
+            if (symbol == '\n') {
+                insertLineAt(line);
+                pos = TextBoxConstants.FIRST_SYMBOL_POS;
+                line++;
+            }
+            else {
+                Character character = CharacterFactory.newChar(symbol);
+                insert(line, pos, character, TextBoxConstants.DEFAULT_FONT);
+                pos++;
+            }
+        }
+        state[0] = line;
+        state[1] = pos;
+        return state;
     }
 }

@@ -1,14 +1,7 @@
-package TextBox;
+package TextBox.util;
 
 import TextBox.dom.TextBoxConstants;
 
-/**
- * Created with IntelliJ IDEA.
- * User: lgsferry
- * Date: 17.03.13
- * Time: 11:56
- * To change this template use File | Settings | File Templates.
- */
 public class Caret {
     protected static Caret _instance = new Caret();
     protected int pos;
@@ -88,6 +81,19 @@ public class Caret {
     }
     public void setSingleOutEndLine(int soLine) {
         singleOutEndLine= soLine;
+    }
+    public void setPosAtSelectionLogicalStart() {
+        if(isSetSingleOut()) {
+            if(singleOutStartLine != singleOutEndLine) {
+                setLine(singleOutStartLine < singleOutEndLine ? singleOutStartLine : singleOutEndLine);
+                setPos(singleOutStartLine < singleOutEndLine ? singleOutStartPos : singleOutEndPos);
+            }
+            else {
+                setLine(singleOutStartLine);
+                setPos(singleOutStartPos < singleOutEndPos ? singleOutStartPos : singleOutEndPos);
+            }
+
+        }
     }
     public int getSelectionStartPos() {
         if(singleOutStartLine==singleOutEndLine) {

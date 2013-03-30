@@ -6,24 +6,11 @@ import TextBox.util.FontPair;
 import java.awt.*;
 import java.util.Vector;
 
-/**
- * Created with IntelliJ IDEA.
- * User: lgsferry
- * Date: 18.03.13
- * Time: 17:38
- * To change this template use File | Settings | File Templates.
- */
-public class Line extends Glyph {
+public class Line {
     private Vector<CharFontPair> charFontLine = new Vector<CharFontPair>();
-    private int pos;
     private int maxHeight;
-    private int posY;
 
-    public Line() {/*pos = _pos;*/}
-    public Line(int posY) {
-        this.posY = posY;
-    }
-    //public int getPos() {return pos;}
+    public Line() {}
     public int getCountOfChars() {
         return charFontLine.size();
     }
@@ -79,12 +66,6 @@ public class Line extends Glyph {
     public int getMaxHeight() {
         return maxHeight;
     }
-    public void setPosY(int posY) {
-        this.posY = posY;
-    }
-    public int getPosY() {
-        return posY;
-    }
     public Font getFont(int pos) {
         CharFontPair l = charFontLine.get(pos);
         return l.getCharFont();
@@ -92,7 +73,6 @@ public class Line extends Glyph {
 }
 
 class CharFontPair {
-    CharFontPair() {}
     CharFontPair(Character c, Font f) {
         character = c;
         charFont = f;

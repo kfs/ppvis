@@ -1,11 +1,3 @@
-/**
- * Created with IntelliJ IDEA.
- * User: lgsferry
- * Date: 13.03.13
- * Time: 20:32
- * To change this template use File | Settings | File Templates.
- */
-
 package TextBox;
 
 import java.awt.*;
@@ -14,6 +6,8 @@ import java.awt.event.*;
 import javax.swing.*;
 
 import TextBox.dom.TextBoxConstants;
+import TextBox.util.Caret;
+import TextBox.util.CharacterFactory;
 import TextBox.util.SFontFrame;
 
 public class AppMain {
@@ -45,12 +39,11 @@ class WndFrame extends JFrame {
     TextPanel textPanel;
     SFontFrame fontChooser = new SFontFrame();
     public WndFrame() {
-
         /*
          * Set default props
          */
 
-        setTitle("Text Editor, v0.2 alpha.");
+        setTitle("Text Editor, v0.3 beta.");
         setSize(DEF_WIDTH, DEF_HEIGHT);
 
         /*
@@ -114,13 +107,19 @@ class WndFrame extends JFrame {
         toolBar.setFloatable(false);
         toolBar.setRollover(true);
         toolBar.setOrientation(SwingConstants.HORIZONTAL);
-        JButton jbtn = new JButton("asf");
+        JButton jbtn = new JButton("Choose Font...");
         jbtn.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
                 //fontChooser.setVisible(true);
+                Caret caret = Caret.Instance();
                 fontChooser.chooseFont(panel);
-                panel.repaint();
+                if (caret.isSetSingleOut()) {
+                    // change font for selected chars
+
+                    caret.setSingleOutFlag(false);
+                    panel.repaint();
+                }
             }
             @Override
             public void mouseReleased(MouseEvent e) {
@@ -165,46 +164,19 @@ class WndFrame extends JFrame {
                                 caret.setSingleOutFlag(false);
                             break;
                         case TextBoxConstants.CONTROL_X_CUT_SEQUENCE:
-                            //panel.cutToClipboard();
+                            panel.cutToClipboard();
                             break;
                         case TextBoxConstants.CONTROL_V_PASTE_SEQUENCE:
-                            //panel.pasteFromClipboard();
+                            panel.pasteFromClipboard();
                             break;
                         case TextBoxConstants.CONTROL_C_COPY_SEQUENCE:
-                            //panel.copyToClipboard();
+                            panel.copyToClipboard();
                             break;
                         default:
-                            /*for (Map.Entry<Integer, TextBox.dom.Character> entry: panel._chars.entrySet()) {
-                                if(entry.getKey() == (int) e.getKeyChar()) {
-                                    panel.keyPressedWithValue(entry.getValue());
-                                    //panel.paint(panel.getGraphics());
-                                    panel.repaint();
-                                    return;
-                                }
-                            }*/
-                            TextBox.dom.Character character = panel._chars.get((int) e.getKeyChar());
-                            if (character == null) {
-                                TextBox.dom.Character c = new TextBox.dom.Character(e.getKeyChar());
-                                panel._chars.put((int) e.getKeyChar(), c);
-                                character = c;
-                            }
-
-                            // panel._chars.put( (int)e.getKeyChar(), c);
+                            TextBox.dom.Character character = CharacterFactory.newChar(e.getKeyChar());
                             panel.keyPressedWithValue(character);
                             panel.repaint();
                     }
-               // }
-//                else {
-//                    switch (e.getKeyChar()) {
-//                        case '\u0003':
-//                            break;
-//                        case '\u0016':
-//                            //panel.pasteFromBuffer();
-//                            break;
-//                        case '\u0018':
-//                            break;
-                 //   }
-               // }
             }
 
             @Override

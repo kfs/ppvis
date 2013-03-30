@@ -7,13 +7,6 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-/**
- * Created with IntelliJ IDEA.
- * User: lgsferry
- * Date: 23.03.13
- * Time: 23:42
- * To change this template use File | Settings | File Templates.
- */
 public class SFontFrame extends JFrame {
     protected JList fontList;
     protected JList sizeList;
@@ -24,12 +17,10 @@ public class SFontFrame extends JFrame {
     protected JCheckBox chkItalic;
     protected TextPanel textView;
 
-    protected boolean boldFlag;
-    protected boolean italicFlag;
     protected Font resultFont;
     protected String resultFontID;
 
-    protected String fontSizes[] = {"4", "6", "8", "9", "10", "11", "12", "14", "16", "18",
+    protected String fontSizes[] = {"4", "6", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19",
             "20", "24", "30", "36", "40", "48", "60", "72"};
     protected String fontNames[] = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
 
@@ -42,18 +33,28 @@ public class SFontFrame extends JFrame {
         init();
     }
 
-    ///private void
     private void  init() {
-        fontList = new JList(fontNames);
-        sizeList = new JList(fontSizes);
+        int defaultFontIndex = 0;
+        int defaultSizeIndex = 9;
 
-        //sizeList.set
+        fontList = new JList(fontNames);
+        for (int currFontIndex = 0; currFontIndex < fontNames.length; currFontIndex++) {
+            if (fontNames[currFontIndex].equals("Serif")) {
+                defaultFontIndex = currFontIndex;
+                break;
+            }
+        }
+        fontList.setSelectedIndex(defaultFontIndex);
+        sizeList = new JList(fontSizes);
+        sizeList.setSelectedIndex(defaultSizeIndex);
+
         JScrollPane fontScroll = new JScrollPane(fontList);
         fontScroll.setPreferredSize(new Dimension(150, 200));
         JScrollPane sizeScroll = new JScrollPane(sizeList);
         sizeScroll.setPreferredSize(new Dimension(60, 200));
-        //sizeList.add(sp = new JScrollPane());
-       // sp.createVerticalScrollBar();
+        fontList.ensureIndexIsVisible(defaultFontIndex);
+        sizeList.ensureIndexIsVisible(sizeList.getSelectedIndex());
+
         btnApply = new JButton("Apply");
         btnApply.addMouseListener(new MouseAdapter() {
             @Override
@@ -82,6 +83,7 @@ public class SFontFrame extends JFrame {
 
                 setVisible(false);
                 textView.updateFont(resultFont);
+                textView.requestFocus();
             }
         });
         btnCancel = new JButton("Cancel");
@@ -122,8 +124,8 @@ public class SFontFrame extends JFrame {
                             .addComponent(btnCancel))
 
         );
+
         add(panel);
-        //setVisible(true);
     }
     public void chooseFont(TextPanel textPanel) {
         textView = textPanel;

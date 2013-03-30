@@ -1,22 +1,18 @@
 package TextBox;
 
 import TextBox.dom.*;
+import TextBox.util.Caret;
 import TextBox.util.FontInfo;
 import TextBox.util.FontPair;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.datatransfer.*;
+import java.io.IOException;
 import java.lang.Character;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Created with IntelliJ IDEA.
- * User: lgsferry
- * Date: 18.03.13
- * Time: 17:44
- * To change this template use File | Settings | File Templates.
- */
 public class TextPanel extends JPanel implements UIComponent {
     /*
      * Vars
@@ -25,13 +21,9 @@ public class TextPanel extends JPanel implements UIComponent {
 
     protected Caret caret = Caret.Instance();
 
-    protected Map<String, Font> fontMap = new HashMap<String, Font>();
-
     protected Font currentFont = new Font("Serif", Font.PLAIN, 15);
 
-    //private Font caretFont = new Font()
-
-    protected static Map<Integer, TextBox.dom.Character> _chars = new HashMap<Integer, TextBox.dom.Character>();
+    protected Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
    // this.key
     /*
      * Overloaded Mehods
@@ -150,43 +142,35 @@ public class TextPanel extends JPanel implements UIComponent {
         g2.drawString(Character.toString(caret.getCaretSymbol()), TextBoxConstants.HORIZONTAL_TEXT_INDENT + caretIndentX - TextBoxConstants.HORIZONTAL_TEXT_MARGIN, caretIndentY);
         g2.setColor(defaultFC);
         g2.setFont(defaultFont);
-
-
-
-        /*
-        Graphics2D g2 = (Graphics2D) g;
-        String message = "" + new Date();
-
-        g2.setFont(f);
-        FontRenderContext context = g2.getFontRenderContext();
-        Rectangle2D bounds = f.getStringBounds(message, context);
-        float space = (float) bounds.getHeight();
-        setBackground(Color.YELLOW);
-        double x = (getWidth() - bounds.getWidth()) / 2;
-        double y = (getHeight() - bounds.getHeight()) / 2;
-        g2.setPaint(Color.RED);
-        g2.drawString(message, (float)x, (float)y);
-        g2.drawString(message, (float)x+10, (float)y + space);
-        //button1.setSize(100, 20);
-        //button2.setSize(100, 20);
-		/*JDialog jf = new JDialog();
-		jf.setVisible(true);
-		jf.setSize(300,	100);// */
-        // add(button1);
-        // add(button2);
-
-        // BtnClickAction action1 = new BtnClickAction(Color.YELLOW);
-        //BtnClickAction action2 = new BtnClickAction(Color.BLACK);
-
-        //button1.addActionListener(action1);
-        //button2.addActionListener(action2);
     }
 
     public void keyPressedWithValue(TextBox.dom.Character character) {
+        if(caret.getVisiblePos() != TextBoxConstants.VISIBLE_POS_NOT_USED)
+            caret.updateVisiblePos();
+        if(caret.isSetSingleOut()) {
+            document.cutSelectedString(caret.getSelectionStartPos(),
+                    caret.getSelectionStartLine(),
+                    caret.getSelectionEndPos(),
+                    caret.getSelectionEndLine()
+            );
+            caret.setPosAtSelectionLogicalStart();
+            caret.setSingleOutFlag(false);
+        }
         document.insert(caret.getLine(), caret.getPos(), character, currentFont);
         caret.changePos(TextBoxConstants.NEXT_POS_MARKER);
     }
     public void charDelete() {
+        if(caret.isSetSingleOut()) {
+            document.cutSelectedString(caret.getSelectionStartPos(),
+                    caret.getSelectionStartLine(),
+                    caret.getSelectionEndPos(),
+                    caret.getSelectionEndLine()
+            );
+            caret.setPosAtSelectionLogicalStart();
+            caret.setSingleOutFlag(false);
+            repaint();
+            return;
+        }
         //isCaretAtMiddleOrEndOfLine
         if(caret.getLine() != TextBoxConstants.FIRST_LINE_POS && caret.getPos() == TextBoxConstants.FIRST_SYMBOL_POS && document.getLineAt(caret.getLine()).getCountOfChars() != 0) {
             /// concat prev and current lines here
@@ -235,10 +219,16 @@ public class TextPanel extends JPanel implements UIComponent {
             repaint();
             return;
         }
+
+        changeCaretPosBorders(count);
+
+        repaint();
+    }
+    protected void changeCaretPosBorders(int count) {
         // left
 
         if(caret.getPos() + count >= TextBoxConstants.FIRST_SYMBOL_POS && caret.getPos() + count <= document.getLineAt(caret.getLine()).getCountOfChars())
-        // right
+            // right
             caret.changePos(count);
         else if(caret.getPos() + count < TextBoxConstants.FIRST_SYMBOL_POS && caret.getLine() > TextBoxConstants.FIRST_LINE_POS) {
             caret.changeLine(TextBoxConstants.PREV_POS_MARKER);
@@ -248,21 +238,23 @@ public class TextPanel extends JPanel implements UIComponent {
             caret.changeLine(TextBoxConstants.NEXT_POS_MARKER);
             caret.setPos(TextBoxConstants.FIRST_SYMBOL_POS);
         }
-
-        repaint();
     }
     public void changeCaretLine(int count) {
         if(caret.isSetSingleOut()) caret.setSingleOutFlag(false);
         //caret.changeLine(count);
+        changeCaretLineBorders(count);
 
+        repaint();
+    }
+    protected void changeCaretLineBorders(int count) {
         //up
         //up when 1st(0) line
         if(count < 0 && caret.getLine() == TextBoxConstants.FIRST_LINE_POS)
             return;
-        //down when last line
+            //down when last line
         else if(count > 0 && caret.getLine() == document.getCountOfLines() + TextBoxConstants.LAST_POS_ERROR)
             return;
-        //caret at the middle of lines
+            //caret at the middle of lines
         else {
             // all good
             if(caret.getLine() + count <= document.getCountOfLines() + TextBoxConstants.LAST_POS_ERROR && caret.getLine() + count >= TextBoxConstants.FIRST_LINE_POS) {
@@ -282,7 +274,6 @@ public class TextPanel extends JPanel implements UIComponent {
         else
             caret.setVisiblePos(TextBoxConstants.VISIBLE_POS_NOT_USED);
         //down
-        repaint();
     }
     public void singleOutPos(int count) {
         if(!caret.isSetSingleOut()) {
@@ -291,8 +282,12 @@ public class TextPanel extends JPanel implements UIComponent {
             caret.setSingleOutStartLine(caret.getLine());
             caret.setSingleOutEndLine(caret.getLine());
         }
-        caret.changePos(count);
+        //caret.changePos(count);
+        if(caret.getVisiblePos() != TextBoxConstants.VISIBLE_POS_NOT_USED)
+            caret.updateVisiblePos();
+        changeCaretPosBorders(count);
         caret.setSingleOutEndPos(caret.getPos());
+        caret.setSingleOutEndLine(caret.getLine());
         caret.setSingleOutFlag(caret.isSelectionActual());
         repaint();
     }
@@ -303,7 +298,9 @@ public class TextPanel extends JPanel implements UIComponent {
             caret.setSingleOutStartLine(caret.getLine());
             caret.setSingleOutEndPos(caret.getPos());
         }
-        caret.changeLine(count);
+        //caret.changeLine(count);
+        changeCaretLineBorders(count);
+
         caret.setSingleOutEndLine(caret.getLine());
         repaint();
     }
@@ -324,5 +321,57 @@ public class TextPanel extends JPanel implements UIComponent {
     }
     public void updateFont(Font font) {
         currentFont = font;
+    }
+    //clipboard commands
+    public void copyToClipboard() {
+        String copyStr = document.copySelectedString(caret.getSelectionStartPos(),
+                                                     caret.getSelectionStartLine(),
+                                                     caret.getSelectionEndPos(),
+                                                     caret.getSelectionEndLine());
+        StringSelection copySelection = new StringSelection(copyStr);
+        clipboard.setContents(copySelection, copySelection);
+    }
+    public void cutToClipboard() {
+        String copyStr = document.cutSelectedString(caret.getSelectionStartPos(),
+                caret.getSelectionStartLine(),
+                caret.getSelectionEndPos(),
+                caret.getSelectionEndLine());
+        caret.setPos(caret.getSelectionStartPos());
+        caret.setSingleOutFlag(false);
+        repaint();
+        StringSelection copySelection = new StringSelection(copyStr);
+        clipboard.setContents(copySelection, copySelection);
+    }
+    public void pasteFromClipboard() {
+        String pasteStr = "";
+        Transferable contents = clipboard.getContents(clipboard);
+        boolean hasTransferableText = (contents != null) && contents.isDataFlavorSupported(DataFlavor.stringFlavor);
+        if(hasTransferableText) {
+            try {
+                pasteStr = (String) contents.getTransferData(DataFlavor.stringFlavor);
+            }
+            catch (UnsupportedFlavorException exception) {
+//                System.out.println(exception);
+//                exception.printStackTrace();
+            }
+            catch (IOException exception) {
+//                System.out.println(exception);
+//                exception.printStackTrace();
+            }
+            if(!pasteStr.equals("")) {
+                if(caret.isSetSingleOut()) {
+                    document.cutSelectedString( caret.getSelectionStartPos(),
+                                                caret.getSelectionStartLine(),
+                                                caret.getSelectionEndPos(),
+                                                caret.getSelectionEndLine()
+                                              );
+                    caret.setSingleOutFlag(false);
+                }
+                int[] state = document.pasteSelectedString(caret.getPos(), caret.getLine(), pasteStr);
+                caret.setLine(state[0]);
+                caret.setPos(state[1]);
+                repaint();
+            }
+        }
     }
 }
