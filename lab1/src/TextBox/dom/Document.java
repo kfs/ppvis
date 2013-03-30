@@ -16,7 +16,9 @@ public class Document {
     public static final int DEFAULT_INDENT_Y = 15;
 
     public Document() {
-        _lines.add(new Line());
+        Line line = new Line();
+        line.setMaxHeight(TextBoxConstants.DEFAULT_LINE_SIZE);
+        _lines.add(line);
     }
     public void insert(int line, int pos, Character character, Font font) {
         _lines.elementAt(line).insertCharAt(pos, character, font);
@@ -28,7 +30,9 @@ public class Document {
         return _lines.elementAt(pos);
     }
     public void insertLineAt(int pos) {
-        _lines.add(pos + 1, new Line());
+        Line line = new Line();
+        line.setMaxHeight(TextBoxConstants.DEFAULT_LINE_SIZE);
+        _lines.add(pos + TextBoxConstants.NEXT_POS_MARKER, line);
     }
     public void deleteLineAt(int pos) {
         _lines.remove(pos);

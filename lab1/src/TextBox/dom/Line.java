@@ -42,8 +42,12 @@ public class Line extends Glyph {
         FontPair fontPair = FontInfo.findFont(charFontPair.getCharFont());
         int height = fontPair.getFontMetrics().getHeight();
         charFontLine.remove(pos);
-        if(height==maxHeight)
-            calculateLineHeight();
+        if(height==maxHeight) {
+            if(getCountOfChars() != 0)
+                calculateLineHeight();
+            else
+                setMaxHeight(TextBoxConstants.DEFAULT_LINE_SIZE);
+        }
     }
     protected void calculateLineHeight() {
         maxHeight = 0;
@@ -60,7 +64,10 @@ public class Line extends Glyph {
         toLine.charFontLine = (Vector<CharFontPair>)charFontLine.clone();
         toLine.charFontLine.subList(0, from).clear();
         charFontLine.subList(from, to).clear();
-        calculateLineHeight();
+        if(getCountOfChars() != 0)
+            calculateLineHeight();
+        else
+            setMaxHeight(TextBoxConstants.DEFAULT_LINE_SIZE);
         toLine.calculateLineHeight();
     }
     public void concatLines(Line concatLine) {

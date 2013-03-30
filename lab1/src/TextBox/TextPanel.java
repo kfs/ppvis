@@ -6,8 +6,6 @@ import TextBox.util.FontPair;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.font.FontRenderContext;
-import java.awt.geom.Rectangle2D;
 import java.lang.Character;
 import java.util.HashMap;
 import java.util.Map;
@@ -77,37 +75,38 @@ public class TextPanel extends JPanel implements UIComponent {
 
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
-        String buf;
+        Graphics2D g2 = (Graphics2D) g;
+
+        String charForDraw;
 
 
-        final int horisontalIndent = 2;
-        int indentX = 0;
+
+        int indentX;
         int indentY = 0;
         int caretIndentX = 0;
-        int caretIndentY = 0;
-        final int margin = 1;
-        Graphics2D g2 = (Graphics2D) g;
-        FontRenderContext context = g2.getFontRenderContext();
-        Rectangle2D bounds;
+        int caretIndentY;
+
+
         FontMetrics metrics = g.getFontMetrics();
-        Font caretFont = currentFont;
+        Font caretFont = TextBoxConstants.DEFAULT_FONT;
         Color selectionColor = new Color(137, 189, 245);
 
+        caretIndentY = metrics.getHeight();
         g2.setFont(currentFont);
-        int lineHeight = 0;
-        for (int lineNo = 0; lineNo < document.getCountOfLines(); lineNo++, indentY += lineHeight) {                    ///!!!!!! lineHeight
+        int lineHeight;
+        for (int lineNo = 0; lineNo < document.getCountOfLines(); lineNo++) {                    ///!!!!!! lineHeight
             indentX = 0;
-                ///indentY += 15; in for loop
-            Line line = document.getLineAt(lineNo);
 
-                //Graphics2D g2 = (Graphics2D) g;
-                //g2.drawString(new String("|"), Document.DEFAULT_INDENT_X + indentX, Document.DEFAULT_INDENT_Y);
+            Line line = document.getLineAt(lineNo);
+            lineHeight = line.getMaxHeight();
+            indentY += lineHeight;
+
             for(int charNo = 0; charNo < line.getCountOfChars(); charNo++) {
                 //buf += line.getCharAt(charNo).getCH();
-                lineHeight = line.getMaxHeight();
+
                 TextBox.dom.Character currentCharacter = line.getCharAt(charNo);
                 char currentChar = currentCharacter.getCH();
-                buf = Character.toString(currentChar);
+                charForDraw = Character.toString(currentChar);
                 g2.setFont(line.getFont(charNo));
                 FontPair fontPair = FontInfo.findFont(line.getFont(charNo));
                 g2.setFont(fontPair.getFont());
@@ -116,26 +115,27 @@ public class TextPanel extends JPanel implements UIComponent {
                 //bounds = g2.getFont().getStringBounds(buf, context);
                 //FontRenderContext context = g2.getFontRenderContext();
                 //Rectangle2D bounds = f.getStringBounds(buf, context);
-                //Rectangle rectangle = new Rectangle(Document.DEFAULT_INDENT_X + indentX, /*Document.DEFAULT_INDENT_Y + indentY*/0, metrics.charWidth(line.getCharAt(charNo).getCH()), 15);
-                //  Rectangle2D backgroundColRect = new Rectangle(Document.DEFAULT_INDENT_X + indentX, Document.DEFAULT_INDENT_Y + indentY, metrics.charWidth(line.getCharAt(charNo).getCH()), caret.getLine()*15);
+                //Rectangle rectangle = new Rectangle(TextBoxConstants.HORIZONTAL_TEXT_INDENT + indentX, /*Document.DEFAULT_INDENT_Y + indentY*/0, metrics.charWidth(line.getCharAt(charNo).getCH()), 15);
+                //  Rectangle2D backgroundColRect = new Rectangle(TextBoxConstants.HORIZONTAL_TEXT_INDENT + indentX, Document.DEFAULT_INDENT_Y + indentY, metrics.charWidth(line.getCharAt(charNo).getCH()), caret.getLine()*15);
                 if(isSelectedChar(charNo, lineNo)) {
                     Color two = g2.getColor();
                     g2.setColor(selectionColor);
-                    g2.fillRect(Document.DEFAULT_INDENT_X + indentX,
-                                Document.DEFAULT_INDENT_Y + indentY - metrics.getHeight() + metrics.getDescent(),
-                                metrics.charWidth(currentChar), lineHeight
+                    g2.fillRect(TextBoxConstants.HORIZONTAL_TEXT_INDENT + indentX,
+                                indentY - metrics.getHeight() + metrics.getDescent(),
+                                metrics.charWidth(currentChar),
+                                lineHeight
                                 );
                     g2.setColor(two);
                 }
                 //metrics.str//
-                g2.drawString(buf, Document.DEFAULT_INDENT_X+indentX, Document.DEFAULT_INDENT_Y+indentY);
-                //g2.drawString("the most", Document.DEFAULT_INDENT_X, Document.DEFAULT_INDENT_Y+15);
+                g2.drawString(charForDraw, TextBoxConstants.HORIZONTAL_TEXT_INDENT + indentX, indentY);
+                //g2.drawString("the most", TextBoxConstants.HORIZONTAL_TEXT_INDENT, Document.DEFAULT_INDENT_Y+15);
                 //indentX += metrics.charWidth(currentChar)+margin/2;
                 indentX += metrics.charWidth(currentChar);
 
                 if(lineNo == caret.getLine() && charNo+1 == caret.getPos()) {
                     caretIndentX = indentX/* - 2*margin;0*/;
-                    caretFont = currentFont;
+                    caretFont = fontPair.getFont();
                 }
             }
             if(lineNo == caret.getLine()) {
@@ -147,7 +147,7 @@ public class TextPanel extends JPanel implements UIComponent {
         g2.setFont(caretFont);
 
         g2.setColor(Color.RED);
-        g2.drawString(Character.toString(caret.getCaretSymbol()), Document.DEFAULT_INDENT_X + caretIndentX, Document.DEFAULT_INDENT_Y + caretIndentY);
+        g2.drawString(Character.toString(caret.getCaretSymbol()), TextBoxConstants.HORIZONTAL_TEXT_INDENT + caretIndentX - TextBoxConstants.HORIZONTAL_TEXT_MARGIN, caretIndentY);
         g2.setColor(defaultFC);
         g2.setFont(defaultFont);
 
@@ -184,48 +184,48 @@ public class TextPanel extends JPanel implements UIComponent {
 
     public void keyPressedWithValue(TextBox.dom.Character character) {
         document.insert(caret.getLine(), caret.getPos(), character, currentFont);
-        caret.changePos(Caret.PLUS_ONE_CHAR);
+        caret.changePos(TextBoxConstants.NEXT_POS_MARKER);
     }
     public void charDelete() {
         //isCaretAtMiddleOrEndOfLine
-        if(caret.getLine() != 0 && caret.getPos() == 0 && document.getLineAt(caret.getLine()).getCountOfChars() != 0) {
+        if(caret.getLine() != TextBoxConstants.FIRST_LINE_POS && caret.getPos() == TextBoxConstants.FIRST_SYMBOL_POS && document.getLineAt(caret.getLine()).getCountOfChars() != 0) {
             /// concat prev and current lines here
-            caret.setPos(document.getLineAt(caret.getLine() - 1).getCountOfChars());
-            document.getLineAt(caret.getLine()-1).concatLines(document.getLineAt(caret.getLine()));
+            caret.setPos(document.getLineAt(caret.getLine() + TextBoxConstants.PREV_POS_MARKER).getCountOfChars());
+            document.getLineAt(caret.getLine()+ TextBoxConstants.PREV_POS_MARKER).concatLines(document.getLineAt(caret.getLine()));
             document.deleteLineAt(caret.getLine());
-            caret.changeLine(Caret.MINUS_ONE_CHAR);
+            caret.changeLine(TextBoxConstants.PREV_POS_MARKER);
         }
         //isCaretAtBeginOfNotFirstLine
-        else if(caret.getPos() == 0 && caret.getLine() != 0) {
+        else if(caret.getPos() == TextBoxConstants.FIRST_SYMBOL_POS && caret.getLine() != TextBoxConstants.FIRST_LINE_POS) {
             document.deleteLineAt(caret.getLine());
-            caret.changeLine(Caret.MINUS_ONE_CHAR);
+            caret.changeLine(TextBoxConstants.PREV_POS_MARKER);
             caret.setPos(document.getLineAt(caret.getLine()).getCountOfChars());
         }
-        else if(caret.getLine() == 0 && caret.getPos() == 0) {
+        else if(caret.getLine() == TextBoxConstants.FIRST_LINE_POS && caret.getPos() == TextBoxConstants.FIRST_SYMBOL_POS) {
             return;
         }
         else {
-            document.getLineAt(caret.getLine()).deleteCharAt(caret.getPos() - 1);
-            caret.changePos(Caret.MINUS_ONE_CHAR);
+            document.getLineAt(caret.getLine()).deleteCharAt(caret.getPos() + TextBoxConstants.PREV_POS_MARKER);
+            caret.changePos(TextBoxConstants.PREV_POS_MARKER);
         }
         repaint();
     }
     public void newLine() {
         document.insertLineAt(caret.getLine());
         if(caret.getPos() == document.getLineAt(caret.getLine()).getCountOfChars()) {
-            caret.changeLine(Caret.PLUS_ONE_CHAR);
-            caret.setPos(0);
+            caret.changeLine(TextBoxConstants.NEXT_POS_MARKER);
+            caret.setPos(TextBoxConstants.FIRST_SYMBOL_POS);
         }
         else {
             /// situation where caret isn't situated at the end of line
             document.getLineAt(caret.getLine()).moveCharsFromTo(caret.getPos(), document.getLineAt(caret.getLine()).getCountOfChars(), document.getLineAt(caret.getLine() + 1));
-            caret.changeLine(Caret.PLUS_ONE_CHAR);
-            caret.setPos(0);
+            caret.changeLine(TextBoxConstants.NEXT_POS_MARKER);
+            caret.setPos(TextBoxConstants.FIRST_SYMBOL_POS);
         }
         repaint();
     }
     public void changeCaretPos(int count) {
-        if(caret.getVisiblePos() != -1)
+        if(caret.getVisiblePos() != TextBoxConstants.VISIBLE_POS_NOT_USED)
             caret.updateVisiblePos();
 
         if(caret.isSetSingleOut()) {
@@ -237,16 +237,16 @@ public class TextPanel extends JPanel implements UIComponent {
         }
         // left
 
-        if(caret.getPos() + count >= 0 && caret.getPos() + count <= document.getLineAt(caret.getLine()).getCountOfChars())
+        if(caret.getPos() + count >= TextBoxConstants.FIRST_SYMBOL_POS && caret.getPos() + count <= document.getLineAt(caret.getLine()).getCountOfChars())
         // right
             caret.changePos(count);
-        else if(caret.getPos() + count < 0 && caret.getLine() > 0) {
-            caret.changeLine(Caret.MINUS_ONE_CHAR);
+        else if(caret.getPos() + count < TextBoxConstants.FIRST_SYMBOL_POS && caret.getLine() > TextBoxConstants.FIRST_LINE_POS) {
+            caret.changeLine(TextBoxConstants.PREV_POS_MARKER);
             caret.setPos(document.getLineAt(caret.getLine()).getCountOfChars());
         }
-        else if(caret.getPos() + count > document.getLineAt(caret.getLine()).getCountOfChars() && caret.getLine() + Caret.PLUS_ONE_CHAR < document.getCountOfLines()) {
-            caret.changeLine(Caret.PLUS_ONE_CHAR);
-            caret.setPos(Caret.POS_AT_THE_BEGIN_OF_LINE);
+        else if(caret.getPos() + count > document.getLineAt(caret.getLine()).getCountOfChars() && caret.getLine() + TextBoxConstants.NEXT_POS_MARKER < document.getCountOfLines()) {
+            caret.changeLine(TextBoxConstants.NEXT_POS_MARKER);
+            caret.setPos(TextBoxConstants.FIRST_SYMBOL_POS);
         }
 
         repaint();
@@ -257,22 +257,22 @@ public class TextPanel extends JPanel implements UIComponent {
 
         //up
         //up when 1st(0) line
-        if(count < 0 && caret.getLine() == 0)
+        if(count < 0 && caret.getLine() == TextBoxConstants.FIRST_LINE_POS)
             return;
         //down when last line
-        else if(count > 0 && caret.getLine() == document.getCountOfLines()-1)
+        else if(count > 0 && caret.getLine() == document.getCountOfLines() + TextBoxConstants.LAST_POS_ERROR)
             return;
         //caret at the middle of lines
         else {
             // all good
-            if(caret.getLine() + count <= document.getCountOfLines()-1 && caret.getLine() + count >= 0) {
+            if(caret.getLine() + count <= document.getCountOfLines() + TextBoxConstants.LAST_POS_ERROR && caret.getLine() + count >= TextBoxConstants.FIRST_LINE_POS) {
                 caret.changeLine(count);
             } // up -  more than exists
             else if(count < 0) {
-                caret.setLine(0);
+                caret.setLine(TextBoxConstants.FIRST_LINE_POS);
             } // down - more than exists
             else {
-                caret.setLine(document.getCountOfLines()-1);
+                caret.setLine(document.getCountOfLines() + TextBoxConstants.LAST_POS_ERROR);
             }
         }
         if(caret.getPos() > document.getLineAt(caret.getLine()).getCountOfChars())
@@ -282,7 +282,7 @@ public class TextPanel extends JPanel implements UIComponent {
                 caret.setVisiblePos(document.getLineAt(caret.getLine()).getCountOfChars());
             }
             else
-                caret.setVisiblePos(-1);
+                caret.setVisiblePos(TextBoxConstants.VISIBLE_POS_NOT_USED);
         }
         //down
         repaint();
