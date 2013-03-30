@@ -37,4 +37,29 @@ public class Document {
     public void deleteLineAt(int pos) {
         _lines.remove(pos);
     }
+    public String copySelectedString(int startPos, int startLine, int endPos, int endLine) {
+        String temp = "";
+        for(int currentLine = startLine; currentLine <= endLine; currentLine++ ) {
+            Line strLine = _lines.get(currentLine);
+            int countOfChars = strLine.getCountOfChars();
+            for(int currentPos = currentLine == startLine ? startPos : 0 ;
+                        currentPos < (currentLine == endLine ? endPos : countOfChars) ;
+                        currentPos++) {
+                char currentChar = strLine.getCharAt(currentPos).getCH();
+                temp += java.lang.Character.toString(currentChar);
+            }
+            if(currentLine != endLine) temp += '\n';
+        }
+
+        return temp;
+    }
+    public String cutSelectedString(int startPos, int startLine, int endPos, int endLine) {
+        String temp = "";
+
+
+        return temp;
+    }
+    public void pasteSelectedString(int pos, int line, String string) {
+
+    }
 }

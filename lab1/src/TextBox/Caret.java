@@ -1,5 +1,7 @@
 package TextBox;
 
+import TextBox.dom.TextBoxConstants;
+
 /**
  * Created with IntelliJ IDEA.
  * User: lgsferry
@@ -19,10 +21,6 @@ public class Caret {
     protected int singleOutEndLine;
     protected boolean singleOutFlag;
 
-    static final int PLUS_ONE_CHAR = 1;
-    static final int MINUS_ONE_CHAR = -1;
-    static final int POS_AT_THE_BEGIN_OF_LINE = 0;
-
     protected Caret() {
         //Instance
     }
@@ -41,6 +39,9 @@ public class Caret {
         line = l;
     }
     public int getPos() {
+        return pos;
+    }
+    public int getLogicalPosition() {
         if(visiblePos < 0)
             return pos;
         else
@@ -60,7 +61,7 @@ public class Caret {
     }
     public void updateVisiblePos() {
         pos = visiblePos;
-        visiblePos = -1;
+        visiblePos = TextBoxConstants.VISIBLE_POS_NOT_USED;
     }
     public int getVisiblePos() {
         return visiblePos;

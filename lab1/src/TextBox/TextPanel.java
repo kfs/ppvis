@@ -133,7 +133,7 @@ public class TextPanel extends JPanel implements UIComponent {
                 //indentX += metrics.charWidth(currentChar)+margin/2;
                 indentX += metrics.charWidth(currentChar);
 
-                if(lineNo == caret.getLine() && charNo+1 == caret.getPos()) {
+                if(lineNo == caret.getLine() && charNo+1 == caret.getLogicalPosition()) {
                     caretIndentX = indentX/* - 2*margin;0*/;
                     caretFont = fontPair.getFont();
                 }
@@ -275,15 +275,12 @@ public class TextPanel extends JPanel implements UIComponent {
                 caret.setLine(document.getCountOfLines() + TextBoxConstants.LAST_POS_ERROR);
             }
         }
-        if(caret.getPos() > document.getLineAt(caret.getLine()).getCountOfChars())
-            caret.setVisiblePos(document.getLineAt(caret.getLine()).getCountOfChars());
-        else if(caret.getVisiblePos() != document.getLineAt(caret.getLine()).getCountOfChars()) {
-            if(caret.getPos() > document.getLineAt(caret.getLine()).getCountOfChars()) {
-                caret.setVisiblePos(document.getLineAt(caret.getLine()).getCountOfChars());
-            }
-            else
-                caret.setVisiblePos(TextBoxConstants.VISIBLE_POS_NOT_USED);
-        }
+        int currentLine = caret.getLine();
+        int countOfChars = document.getLineAt(currentLine).getCountOfChars();
+        if(caret.getPos() > countOfChars)
+            caret.setVisiblePos(countOfChars);
+        else
+            caret.setVisiblePos(TextBoxConstants.VISIBLE_POS_NOT_USED);
         //down
         repaint();
     }

@@ -12,6 +12,8 @@ import java.awt.*;
 import java.awt.event.*;
 
 import javax.swing.*;
+
+import TextBox.dom.TextBoxConstants;
 import TextBox.util.SFontFrame;
 
 public class AppMain {
@@ -48,7 +50,7 @@ class WndFrame extends JFrame {
          * Set default props
          */
 
-        setTitle("Text Editor, v0.1 alpha.");
+        setTitle("Text Editor, v0.2 alpha.");
         setSize(DEF_WIDTH, DEF_HEIGHT);
 
         /*
@@ -145,42 +147,64 @@ class WndFrame extends JFrame {
             @Override
             public void keyTyped(KeyEvent e) {
                 Caret caret = Caret.Instance();
-                switch (e.getKeyChar()) {
-                    case '\b':
-                        panel.charDelete(); //handle caret selection
-                        if (caret.isSetSingleOut())
-                            caret.setSingleOutFlag(false);
-                        break;
-                    case '\u007F':
-                        //just for test
-                        //panel.changeCaretPos(3);
-                        //just for test
-                        break;
-                    case '\n':
-                        panel.newLine(); //handle caret selection
-                        if (caret.isSetSingleOut())
-                            caret.setSingleOutFlag(false);
-                        break;
-                    default:
-                        /*for (Map.Entry<Integer, TextBox.dom.Character> entry: panel._chars.entrySet()) {
-                            if(entry.getKey() == (int) e.getKeyChar()) {
-                                panel.keyPressedWithValue(entry.getValue());
-                                //panel.paint(panel.getGraphics());
-                                panel.repaint();
-                                return;
+                ///if(!e.isControlDown()) {
+                    switch (e.getKeyChar()) {
+                        case TextBoxConstants.BACK_SPACE_SYMBOL:
+                            panel.charDelete(); //handle caret selection
+                            if (caret.isSetSingleOut())
+                                caret.setSingleOutFlag(false);
+                            break;
+                        case TextBoxConstants.DELETE_SYMBOL:
+                            //just for test
+                            //panel.changeCaretPos(3);
+                            //just for test
+                            break;
+                        case TextBoxConstants.NEW_LINE_SYMBOL:
+                            panel.newLine(); //handle caret selection
+                            if (caret.isSetSingleOut())
+                                caret.setSingleOutFlag(false);
+                            break;
+                        case TextBoxConstants.CONTROL_X_CUT_SEQUENCE:
+                            //panel.cutToClipboard();
+                            break;
+                        case TextBoxConstants.CONTROL_V_PASTE_SEQUENCE:
+                            //panel.pasteFromClipboard();
+                            break;
+                        case TextBoxConstants.CONTROL_C_COPY_SEQUENCE:
+                            //panel.copyToClipboard();
+                            break;
+                        default:
+                            /*for (Map.Entry<Integer, TextBox.dom.Character> entry: panel._chars.entrySet()) {
+                                if(entry.getKey() == (int) e.getKeyChar()) {
+                                    panel.keyPressedWithValue(entry.getValue());
+                                    //panel.paint(panel.getGraphics());
+                                    panel.repaint();
+                                    return;
+                                }
+                            }*/
+                            TextBox.dom.Character character = panel._chars.get((int) e.getKeyChar());
+                            if (character == null) {
+                                TextBox.dom.Character c = new TextBox.dom.Character(e.getKeyChar());
+                                panel._chars.put((int) e.getKeyChar(), c);
+                                character = c;
                             }
-                        }*/
-                        TextBox.dom.Character character = panel._chars.get((int) e.getKeyChar());
-                        if (character == null) {
-                            TextBox.dom.Character c = new TextBox.dom.Character(e.getKeyChar());
-                            panel._chars.put((int) e.getKeyChar(), c);
-                            character = c;
-                        }
 
-                        // panel._chars.put( (int)e.getKeyChar(), c);
-                        panel.keyPressedWithValue(character);
-                        panel.repaint();
-                }
+                            // panel._chars.put( (int)e.getKeyChar(), c);
+                            panel.keyPressedWithValue(character);
+                            panel.repaint();
+                    }
+               // }
+//                else {
+//                    switch (e.getKeyChar()) {
+//                        case '\u0003':
+//                            break;
+//                        case '\u0016':
+//                            //panel.pasteFromBuffer();
+//                            break;
+//                        case '\u0018':
+//                            break;
+                 //   }
+               // }
             }
 
             @Override
@@ -189,31 +213,31 @@ class WndFrame extends JFrame {
                 if (e.isShiftDown()) {
                     switch (e.getKeyCode()) {
                         case KeyEvent.VK_UP:
-                            panel.singleOutLine(Caret.MINUS_ONE_CHAR);
+                            panel.singleOutLine(TextBoxConstants.PREV_POS_MARKER);
                             break;
                         case KeyEvent.VK_DOWN:
-                            panel.singleOutLine(Caret.PLUS_ONE_CHAR);
+                            panel.singleOutLine(TextBoxConstants.NEXT_POS_MARKER);
                             break;
                         case KeyEvent.VK_LEFT:
-                            panel.singleOutPos(Caret.MINUS_ONE_CHAR);
+                            panel.singleOutPos(TextBoxConstants.PREV_POS_MARKER);
                             break;
                         case KeyEvent.VK_RIGHT:
-                            panel.singleOutPos(Caret.PLUS_ONE_CHAR);
+                            panel.singleOutPos(TextBoxConstants.NEXT_POS_MARKER);
                             break;
                     }
                 } else {
                     switch (e.getKeyCode()) {
                         case KeyEvent.VK_UP:
-                            panel.changeCaretLine(Caret.MINUS_ONE_CHAR);
+                            panel.changeCaretLine(TextBoxConstants.PREV_POS_MARKER);
                             break;
                         case KeyEvent.VK_DOWN:
-                            panel.changeCaretLine(Caret.PLUS_ONE_CHAR);
+                            panel.changeCaretLine(TextBoxConstants.NEXT_POS_MARKER);
                             break;
                         case KeyEvent.VK_LEFT:
-                            panel.changeCaretPos(Caret.MINUS_ONE_CHAR);
+                            panel.changeCaretPos(TextBoxConstants.PREV_POS_MARKER);
                             break;
                         case KeyEvent.VK_RIGHT:
-                            panel.changeCaretPos(Caret.PLUS_ONE_CHAR);
+                            panel.changeCaretPos(TextBoxConstants.NEXT_POS_MARKER);
                             break;
                     }
                 }
