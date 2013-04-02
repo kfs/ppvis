@@ -101,4 +101,26 @@ public class Document {
         state[1] = pos;
         return state;
     }
+    public void calculateLineWidth(int line) {
+        _lines.get(line).calculateLineWidth();
+    }
+    public int calculateMaxWidthOfLines() {
+        int maxLineWidth = 0;
+        int currLineWidth;
+        for (Line line : _lines) {
+            currLineWidth = line.getWidth();
+            if (maxLineWidth < currLineWidth)
+                maxLineWidth = currLineWidth;
+        }
+        return maxLineWidth;
+    }
+    public int calculateMaxHeightOfLines() {
+        int maxLinesHeight = 0;
+        int currLineHeight;
+        for (Line line : _lines) {
+            currLineHeight = line.getMaxHeight();
+            maxLinesHeight += currLineHeight;
+        }
+        return maxLinesHeight;
+    }
 }

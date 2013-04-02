@@ -43,8 +43,8 @@ class WndFrame extends JFrame {
          * Set default props
          */
 
-        setTitle("Text Editor, v0.3 beta.");
-        setSize(DEF_WIDTH, DEF_HEIGHT);
+        setTitle("Text Editor, v0.4 beta.");
+        setSize(TextPanel.DEFAULT_TEXT_PANEL_WIDTH, TextPanel.DEFAULT_TEXT_PANEL_HEIGHT);
 
         /*
          * Menu
@@ -112,14 +112,7 @@ class WndFrame extends JFrame {
             @Override
             public void mousePressed(MouseEvent e) {
                 //fontChooser.setVisible(true);
-                Caret caret = Caret.Instance();
                 fontChooser.chooseFont(panel);
-                if (caret.isSetSingleOut()) {
-                    // change font for selected chars
-
-                    caret.setSingleOutFlag(false);
-                    panel.repaint();
-                }
             }
             @Override
             public void mouseReleased(MouseEvent e) {
@@ -141,7 +134,7 @@ class WndFrame extends JFrame {
         panel.setFocusable(true);
         panel.setBackground(Color.WHITE);
         panel.requestFocusInWindow();
-        panel.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+        //panel.setBorder(BorderFactory.createLineBorder(Color.GRAY));
         panel.addKeyListener(new KeyAdapter() {
             @Override
             public void keyTyped(KeyEvent e) {
@@ -217,8 +210,9 @@ class WndFrame extends JFrame {
         });
         //panel.add(toolBar, BorderLayout.PAGE_START);
         add(toolBar,BorderLayout.PAGE_START);
-        JScrollPane sp = new JScrollPane(panel);
+        JScrollPane sp = new JScrollPane(panel, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
         sp.setBorder(null);
+        sp.createHorizontalScrollBar();
         add(sp);
         panel.requestFocusInWindow();
 
@@ -226,6 +220,4 @@ class WndFrame extends JFrame {
     public void initPanelUI() {
         textPanel.initFontInfo();
     }
-    public static final int DEF_WIDTH = 600;
-    public static final int DEF_HEIGHT = 500;
 }

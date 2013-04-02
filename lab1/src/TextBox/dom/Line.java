@@ -9,6 +9,7 @@ import java.util.Vector;
 public class Line {
     private Vector<CharFontPair> charFontLine = new Vector<CharFontPair>();
     private int maxHeight;
+    private int width;
 
     public Line() {}
     public int getCountOfChars() {
@@ -36,7 +37,7 @@ public class Line {
                 setMaxHeight(TextBoxConstants.DEFAULT_LINE_SIZE);
         }
     }
-    protected void calculateLineHeight() {
+    public void calculateLineHeight() {
         maxHeight = 0;
         int height;
         for(CharFontPair charFontPair : charFontLine) {
@@ -44,6 +45,8 @@ public class Line {
             height = font.getFontMetrics().getHeight();
             if(height > maxHeight) maxHeight = height;
         }
+        if (maxHeight == 0)
+            maxHeight = TextBoxConstants.DEFAULT_LINE_SIZE;
     }
     public void moveCharsFromTo(int from, int to, Line toLine) {
         //Line temp = new Line();
@@ -66,9 +69,31 @@ public class Line {
     public int getMaxHeight() {
         return maxHeight;
     }
+    public void setWidth(int width1) {
+        width = width1;
+    }
+    public int getWidth() {
+        return width;
+    }
+    public int calculateLineWidth() {
+        int lineWidth = 0;
+        for (CharFontPair charFontPair : charFontLine) {
+            char currChar = charFontPair.getChar().getCH();
+            Font currFont = charFontPair.getCharFont();
+            FontPair fontPair = FontInfo.findFont(currFont);
+            int charWidth = fontPair.getFontMetrics().charWidth(currChar);
+            lineWidth += charWidth;
+        }
+        width = lineWidth;
+        return width;
+    }
     public Font getFont(int pos) {
         CharFontPair l = charFontLine.get(pos);
         return l.getCharFont();
+    }
+    public void setFont(int pos, Font font) {
+        CharFontPair l = charFontLine.get(pos);
+        l.setCharFont(font);
     }
 }
 

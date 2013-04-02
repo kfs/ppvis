@@ -22,6 +22,14 @@ public class TextBoxConstants {
     public static final char DELETE_SYMBOL = '\u007F';
     public static final char BACK_SPACE_SYMBOL = '\b';
 
+    //scrollpane constants
+    public static final int DEFAULT_HORIZONTAL_SCROLL_INDENT = 25;
+    public static final int DEFAULT_VERTICAL_SCROLL_INDENT = 20;
+
+    //copy-paste consts
+    public static final int AFTER_PASTE_CARET_LINE = 0;
+    public static final int AFTER_PASTE_CARET_POS = 1;
+
     public static final Font DEFAULT_FONT = new Font("Serif", Font.PLAIN, DEFAULT_FONT_SIZE);
 
     private TextBoxConstants() {}

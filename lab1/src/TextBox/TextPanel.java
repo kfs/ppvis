@@ -10,10 +10,15 @@ import java.awt.*;
 import java.awt.datatransfer.*;
 import java.io.IOException;
 import java.lang.Character;
-import java.util.HashMap;
-import java.util.Map;
 
 public class TextPanel extends JPanel implements UIComponent {
+    /*
+     * Constants
+     */
+
+    public static int DEFAULT_TEXT_PANEL_HEIGHT = 450;
+    public static int DEFAULT_TEXT_PANEL_WIDTH = 550;
+
     /*
      * Vars
      */
@@ -24,6 +29,10 @@ public class TextPanel extends JPanel implements UIComponent {
     protected Font currentFont = new Font("Serif", Font.PLAIN, 15);
 
     protected Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+
+    protected Rectangle caretRectangle;
+
+    protected boolean scrollNeedUpdate;
    // this.key
     /*
      * Overloaded Mehods
@@ -41,6 +50,8 @@ public class TextPanel extends JPanel implements UIComponent {
      */
 
     public TextPanel() {
+        setAutoscrolls(true);
+
         //initFontInfo();
 //        getGraphics().setFont(currentFont);
     }
@@ -86,7 +97,7 @@ public class TextPanel extends JPanel implements UIComponent {
         caretIndentY = metrics.getHeight();
         g2.setFont(currentFont);
         int lineHeight;
-        for (int lineNo = 0; lineNo < document.getCountOfLines(); lineNo++) {                    ///!!!!!! lineHeight
+        for (int lineNo = 0; lineNo < document.getCountOfLines(); lineNo++) {
             indentX = 0;
 
             Line line = document.getLineAt(lineNo);
@@ -109,7 +120,7 @@ public class TextPanel extends JPanel implements UIComponent {
                 //Rectangle2D bounds = f.getStringBounds(buf, context);
                 //Rectangle rectangle = new Rectangle(TextBoxConstants.HORIZONTAL_TEXT_INDENT + indentX, /*Document.DEFAULT_INDENT_Y + indentY*/0, metrics.charWidth(line.getCharAt(charNo).getCH()), 15);
                 //  Rectangle2D backgroundColRect = new Rectangle(TextBoxConstants.HORIZONTAL_TEXT_INDENT + indentX, Document.DEFAULT_INDENT_Y + indentY, metrics.charWidth(line.getCharAt(charNo).getCH()), caret.getLine()*15);
-                if(isSelectedChar(charNo, lineNo)) {
+                if(isCharSelected(charNo, lineNo)) {
                     Color two = g2.getColor();
                     g2.setColor(selectionColor);
                     g2.fillRect(TextBoxConstants.HORIZONTAL_TEXT_INDENT + indentX,
@@ -125,7 +136,7 @@ public class TextPanel extends JPanel implements UIComponent {
                 //indentX += metrics.charWidth(currentChar)+margin/2;
                 indentX += metrics.charWidth(currentChar);
 
-                if(lineNo == caret.getLine() && charNo+1 == caret.getLogicalPosition()) {
+                if(lineNo == caret.getLine() && charNo + TextBoxConstants.NEXT_POS_MARKER == caret.getLogicalPosition()) {
                     caretIndentX = indentX/* - 2*margin;0*/;
                     caretFont = fontPair.getFont();
                 }
@@ -137,11 +148,15 @@ public class TextPanel extends JPanel implements UIComponent {
         Color defaultFC = g2.getColor();
         Font defaultFont = g2.getFont();
         g2.setFont(caretFont);
-
+        caretRectangle = new Rectangle( TextBoxConstants.HORIZONTAL_TEXT_INDENT + caretIndentX - 15 - TextBoxConstants.HORIZONTAL_TEXT_MARGIN, caretIndentY, TextBoxConstants.DEFAULT_HORIZONTAL_SCROLL_INDENT, TextBoxConstants.DEFAULT_VERTICAL_SCROLL_INDENT);
+        g2.drawRect( TextBoxConstants.HORIZONTAL_TEXT_INDENT + caretIndentX - 15 - TextBoxConstants.HORIZONTAL_TEXT_MARGIN, caretIndentY, TextBoxConstants.DEFAULT_HORIZONTAL_SCROLL_INDENT, TextBoxConstants.DEFAULT_VERTICAL_SCROLL_INDENT);
         g2.setColor(Color.RED);
         g2.drawString(Character.toString(caret.getCaretSymbol()), TextBoxConstants.HORIZONTAL_TEXT_INDENT + caretIndentX - TextBoxConstants.HORIZONTAL_TEXT_MARGIN, caretIndentY);
+
         g2.setColor(defaultFC);
         g2.setFont(defaultFont);
+       // updateScrollPane(caretRectangle);
+        checkScrollUpdate();
     }
 
     public void keyPressedWithValue(TextBox.dom.Character character) {
@@ -158,6 +173,11 @@ public class TextPanel extends JPanel implements UIComponent {
         }
         document.insert(caret.getLine(), caret.getPos(), character, currentFont);
         caret.changePos(TextBoxConstants.NEXT_POS_MARKER);
+        document.calculateLineWidth(caret.getLine());
+
+        //updateScrollPane(caretRectangle);
+        //checkScrollUpdate();
+        scrollNeedUpdate = true;
     }
     public void charDelete() {
         if(caret.isSetSingleOut()) {
@@ -192,7 +212,11 @@ public class TextPanel extends JPanel implements UIComponent {
             document.getLineAt(caret.getLine()).deleteCharAt(caret.getPos() + TextBoxConstants.PREV_POS_MARKER);
             caret.changePos(TextBoxConstants.PREV_POS_MARKER);
         }
+        document.calculateLineWidth(caret.getLine());
+
+        scrollNeedUpdate = true;
         repaint();
+        //updateScrollPane(caretRectangle);
     }
     public void newLine() {
         document.insertLineAt(caret.getLine());
@@ -206,7 +230,10 @@ public class TextPanel extends JPanel implements UIComponent {
             caret.changeLine(TextBoxConstants.NEXT_POS_MARKER);
             caret.setPos(TextBoxConstants.FIRST_SYMBOL_POS);
         }
+
+        scrollNeedUpdate = true;
         repaint();
+        //updateScrollPane(caretRectangle);
     }
     public void changeCaretPos(int count) {
         if(caret.getVisiblePos() != TextBoxConstants.VISIBLE_POS_NOT_USED)
@@ -222,7 +249,9 @@ public class TextPanel extends JPanel implements UIComponent {
 
         changeCaretPosBorders(count);
 
+        scrollNeedUpdate = true;
         repaint();
+        //updateScrollPane(caretRectangle);
     }
     protected void changeCaretPosBorders(int count) {
         // left
@@ -244,7 +273,9 @@ public class TextPanel extends JPanel implements UIComponent {
         //caret.changeLine(count);
         changeCaretLineBorders(count);
 
+        scrollNeedUpdate = true;
         repaint();
+//        updateScrollPane(caretRectangle);
     }
     protected void changeCaretLineBorders(int count) {
         //up
@@ -304,23 +335,93 @@ public class TextPanel extends JPanel implements UIComponent {
         caret.setSingleOutEndLine(caret.getLine());
         repaint();
     }
-    private boolean isSelectedChar(int pos, int line) {
+    private boolean isCharSelected(int pos, int line) {
         if(!caret.isSetSingleOut()) return false;
 
-        if(line > caret.getSelectionStartLine() && line < caret.getSelectionEndLine())
+        /*if(isLineFullySelected(line))
             return true;
-        //else if()
-        else if(line == caret.getSelectionStartLine() && pos >= caret.getSelectionStartPos() && caret.getSelectionEndLine()>caret.getSelectionStartLine())
+        else if(isCharAtFirstLineOfSelection(pos, line))
             return true;
-        else if(line == caret.getSelectionEndLine() && pos < caret.getSelectionEndPos() && caret.getSelectionStartLine()<caret.getSelectionEndLine())
+        else if(isCharAtLastLineOfSelection(pos, line))
             return true;
-        else if(caret.getSelectionStartLine() == caret.getSelectionEndLine() && line == caret.getSelectionStartLine() && pos >= caret.getSelectionStartPos() && pos < caret.getSelectionEndPos())
+        else if(isCharInOneLineSelection(pos, line))
             return true;
         else
-        return false;
+        return false;*/
+
+        /*if(isLineFullySelected(line)
+            || isCharAtFirstLineOfSelection(pos, line)
+            || isCharAtLastLineOfSelection(pos, line)
+            || isCharInOneLineSelection(pos, line))
+            return true;
+        else
+            return false;*/
+
+        return isLineFullySelected(line)
+                || isCharAtFirstLineOfSelection(pos, line)
+                || isCharAtLastLineOfSelection(pos, line)
+                || isCharInOneLineSelection(pos, line);
+    }
+    private boolean isLineFullySelected(int line) {
+        return line > caret.getSelectionStartLine()
+               && line < caret.getSelectionEndLine();
+    }
+    private boolean isCharAtFirstLineOfSelection(int pos, int line) {
+        int selectionStartPos = caret.getSelectionStartPos();
+        int selectionStartLine = caret.getSelectionStartLine();
+        int selectionEndLine = caret.getSelectionEndLine();
+        return line == selectionStartLine
+                    && pos >= selectionStartPos
+                    && selectionEndLine > selectionStartLine;
+    }
+    private boolean isCharAtLastLineOfSelection(int pos, int line) {
+        int selectionStartLine = caret.getSelectionStartLine();
+        int selectionEndPos = caret.getSelectionEndPos();
+        int selectionEndLine = caret.getSelectionEndLine();
+        return line == selectionEndLine
+                    && pos < selectionEndPos
+                    && selectionStartLine < selectionEndLine;
+    }
+    private boolean isCharInOneLineSelection(int pos, int line) {
+        int selectionStartPos = caret.getSelectionStartPos();
+        int selectionStartLine = caret.getSelectionStartLine();
+        int selectionEndPos = caret.getSelectionEndPos();
+        int selectionEndLine = caret.getSelectionEndLine();
+        return  selectionStartLine == selectionEndLine
+                && line == selectionStartLine
+                && pos >= selectionStartPos
+                && pos < selectionEndPos;
     }
     public void updateFont(Font font) {
-        currentFont = font;
+        if(caret.isSetSingleOut()) {
+            int startLineNum = caret.getSelectionStartLine();
+            int startPosNum = caret.getSelectionStartPos();
+            int endLineNum = caret.getSelectionEndLine();
+            int endPosNum = caret.getSelectionEndPos();
+            Line currLine;
+
+            if(startLineNum == endLineNum && startPosNum == endPosNum) {
+                caret.setSingleOutFlag(false);
+                currentFont = font;
+                return;
+            }
+
+            for(int currLineNum = startLineNum; currLineNum <= endLineNum; currLineNum++ ) {
+                currLine = document.getLineAt(currLineNum);
+                int countOfChars = currLine.getCountOfChars();
+                for(int currPosNum = currLineNum == startLineNum ? startPosNum : 0 ;
+                    currPosNum < (currLineNum == endLineNum ? endPosNum : countOfChars) ;
+                    currPosNum++) {
+                    currLine.setFont(currPosNum, font);
+                }
+                currLine.calculateLineWidth();
+                currLine.calculateLineHeight();
+            }
+            repaint();
+            return;
+        }
+        else
+            currentFont = font;
     }
     //clipboard commands
     public void copyToClipboard() {
@@ -345,7 +446,8 @@ public class TextPanel extends JPanel implements UIComponent {
     public void pasteFromClipboard() {
         String pasteStr = "";
         Transferable contents = clipboard.getContents(clipboard);
-        boolean hasTransferableText = (contents != null) && contents.isDataFlavorSupported(DataFlavor.stringFlavor);
+        boolean hasTransferableText = (contents != null)
+                                    && contents.isDataFlavorSupported(DataFlavor.stringFlavor);
         if(hasTransferableText) {
             try {
                 pasteStr = (String) contents.getTransferData(DataFlavor.stringFlavor);
@@ -368,10 +470,41 @@ public class TextPanel extends JPanel implements UIComponent {
                     caret.setSingleOutFlag(false);
                 }
                 int[] state = document.pasteSelectedString(caret.getPos(), caret.getLine(), pasteStr);
-                caret.setLine(state[0]);
-                caret.setPos(state[1]);
+                caret.setLine(state[TextBoxConstants.AFTER_PASTE_CARET_LINE]);
+                caret.setPos(state[TextBoxConstants.AFTER_PASTE_CARET_POS]);
                 repaint();
             }
+        }
+    }
+    public void updateScrollPane() {
+        int panelWidth = document.calculateMaxWidthOfLines() + TextBoxConstants.DEFAULT_HORIZONTAL_SCROLL_INDENT;
+        int panelHeight = document.calculateMaxHeightOfLines() + TextBoxConstants.DEFAULT_VERTICAL_SCROLL_INDENT;
+        Rectangle panelVisibleRect = getVisibleRect();
+        int panelVisibleWidth = (int) panelVisibleRect.getWidth() - 10;
+        int panelVisibleHeight = (int) panelVisibleRect.getHeight();
+
+        if(isPanelNeedScrollUpdate(panelWidth, panelHeight, panelVisibleWidth, panelVisibleHeight)) {
+            int width = panelWidth > panelVisibleWidth ? panelWidth : panelVisibleWidth;
+
+            int height = panelHeight > panelVisibleHeight ? panelHeight : panelVisibleHeight;
+            setSize(width, height);
+            setPreferredSize(new Dimension(width, height));
+        }
+        scrollRectToVisible(caretRectangle);
+    }
+    private boolean isPanelNeedScrollUpdate(int panelWidth, int panelHeight, int panelVisibleWidth, int panelVisibleHeight) {
+        return panelWidth > panelVisibleWidth
+                //|| (panelWidth > panelVisibleWidth && getWidth() > panelWidth)
+                || (panelWidth < getWidth()-10 && panelVisibleWidth < getWidth()-10)
+                || panelHeight > getHeight()
+                //|| (panelHeight > panelVisibleHeight && panelHeight > getWidth())
+                || (panelHeight < getHeight() && panelVisibleHeight < getHeight());
+    }
+    protected void checkScrollUpdate() {
+        if(scrollNeedUpdate) {
+            updateScrollPane();
+            scrollNeedUpdate = false;
+            repaint();
         }
     }
 }
