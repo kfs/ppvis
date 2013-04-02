@@ -418,7 +418,6 @@ public class TextPanel extends JPanel implements UIComponent {
                 currLine.calculateLineHeight();
             }
             repaint();
-            return;
         }
         else
             currentFont = font;
