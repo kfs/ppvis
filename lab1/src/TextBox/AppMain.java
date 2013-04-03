@@ -127,6 +127,15 @@ class WndFrame extends JFrame {
         toolBar.add(pasteBtn);
         toolBar.addSeparator();
 
+        JButton newFile = new JButton(new ImageIcon("imgs/new.png"));
+        newFile.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                panel.newDocument();
+            }
+        });
+        newFile.setFocusable(false);
+        toolBar.add(newFile);
         JButton openFile = new JButton(new ImageIcon("imgs/open.png"));
         openFile.addMouseListener(new MouseAdapter() {
             @Override
@@ -173,30 +182,35 @@ class WndFrame extends JFrame {
                 if(returnVal == JFileChooser.APPROVE_OPTION)
                     try{
                         File saveFile = fileChooser.getSelectedFile();
-                        String fileName = fileChooser.getName();
+                        String fileName = fileChooser.getName(saveFile);
                         String filePath = saveFile.getAbsolutePath();
 
                         if(!saveFile.exists()){
-                            //saveFile.createNewFile();
                             BufferedWriter out = new BufferedWriter(new FileWriter(saveFile));
-                            out.write("sfasf"/*panel.getText()*/);
+                            int countOfLines = panel.getCountOfLines();
+                            for (int currLine = 0; currLine < countOfLines; currLine++) {
+                                out.write(panel.getLine(currLine));
+                                out.newLine();
+                            }
+                            panel.setFileName(fileName);
                             out.close();
                         }
                         else{
-                            String message = "File • " + fileName + " • already exist in \n" + filePath + ":\n" + "Do you want to overwrite?";
+                            String message = "File  \'" + fileName + "\' already exist in \n" + filePath + ":\n" + "Do you want to overwrite?";
                             String title = "Warning";
                             int reply = JOptionPane.showConfirmDialog(null, message, title, JOptionPane.YES_NO_OPTION);
                             if(reply == JOptionPane.YES_OPTION){
-                                //saveFile.delete();
-                                //saveFile.createNewFile();
                                 BufferedWriter out = new BufferedWriter(new FileWriter(saveFile));
-                                out.write("dsdg"/*panel.getText()*/);
+                                int countOfLines = panel.getCountOfLines();
+                                for (int currLine = 0; currLine < countOfLines; currLine++) {
+                                    out.write(panel.getLine(currLine));
+                                    out.newLine();
+                                }
                                 out.close();
-                                JOptionPane.showMessageDialog(null, "File • " + fileName + " • overwritten succesfully in \n" + filePath);
+                                JOptionPane.showMessageDialog(null, "File \'" + fileName + "\' overwritten successfully in \n" + filePath);
 
                             }
                         }
-
                     }
                     catch(IOException exception){
                         System.out.println(exception);
@@ -212,23 +226,51 @@ class WndFrame extends JFrame {
 
         JButton fontBold = new JButton(new ImageIcon("imgs/bold.png"));
         fontBold.setFocusable(false);
-
+        fontBold.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                panel.setBold();
+            }
+        });
         toolBar.add(fontBold);
 
         JButton fontItalic = new JButton(new ImageIcon("imgs/italic.png"));
         fontItalic.setFocusable(false);
-
+        fontItalic.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                panel.setItalic();
+            }
+        });
         toolBar.add(fontItalic);
 
-        JComboBox fontName = new JComboBox(GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames());
+        final JComboBox fontName = new JComboBox(GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames());
         fontName.setFocusable(false);
+        fontName.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                if (e.getStateChange() == ItemEvent.SELECTED) {
+                    Object item = e.getItem();
+                    panel.setFontName((String) item);
+                }
+            }
+        });
         toolBar.add(fontName);
 
         String fontSizes[] = {"4", "6", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19",
                 "20", "24", "30", "36", "40", "48", "60", "72"};
-        JComboBox fontSize = new JComboBox(fontSizes);
+        final JComboBox fontSize = new JComboBox(fontSizes);
         fontSize.setSelectedIndex(9);
         fontSize.setFocusable(false);
+        fontSize.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                if (e.getStateChange() == ItemEvent.SELECTED) {
+                    Object item = e.getItem();
+                    panel.setFontSize(Integer.parseInt((String) item));
+                }
+            }
+        });
         toolBar.add(fontSize);
 
         //

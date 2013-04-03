@@ -4,13 +4,6 @@ import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Created with IntelliJ IDEA.
- * User: lgsferry
- * Date: 23.03.13
- * Time: 10:41
- * To change this template use File | Settings | File Templates.
- */
 public class FontInfo {
     private static Map<String, FontPair> fontMap = new HashMap<String, FontPair>();
     private static Graphics graphics;
@@ -32,10 +25,10 @@ public class FontInfo {
         FontPair searchResult = fontMap.get(keyString);
         if(searchResult == null) {
             Font newFont = new Font(fontName, style, size);
+            graphics.setFont(newFont);
             FontMetrics newFM = graphics.getFontMetrics();
             FontPair fontPair = new FontPair(newFM, newFont);
             fontMap.put(keyString, fontPair);
-
             return fontPair;
         }
         else return searchResult;

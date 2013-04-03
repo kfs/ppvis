@@ -78,14 +78,16 @@ public class TextPanel extends JPanel {
         int caretIndentX = 0;
         int caretIndentY;
 
+        g2.setFont(currentFont);
         FontMetrics metrics = g2.getFontMetrics();
         Font caretFont = TextBoxConstants.DEFAULT_FONT;
         Color selectionColor = new Color(137, 189, 245);
 
         caretIndentY = metrics.getHeight();
-        g2.setFont(currentFont);
+
         int lineHeight;
         int selectionIndent = 0;
+        int caretHeight = caretIndentY;
         for (int lineNo = 0; lineNo < document.getCountOfLines(); lineNo++) {
             indentX = 0;
 
@@ -110,7 +112,7 @@ public class TextPanel extends JPanel {
                 TextBox.dom.Character currentCharacter = line.getCharAt(charNo);
                 char currentChar = currentCharacter.getCH();
                 charForDraw = Character.toString(currentChar);
-                g2.setFont(line.getFont(charNo));
+                //g2.setFont(line.getFont(charNo));
                 FontPair fontPair = FontInfo.findFont(line.getFont(charNo));
                 g2.setFont(fontPair.getFont());
                 metrics = fontPair.getFontMetrics();
@@ -119,7 +121,7 @@ public class TextPanel extends JPanel {
                 //FontRenderContext context = g2.getFontRenderContext();
                 //Rectangle2D bounds = f.getStringBounds(buf, context);
                 //Rectangle rectangle = new Rectangle(TextBoxConstants.HORIZONTAL_TEXT_INDENT + indentX, /*Document.DEFAULT_INDENT_Y + indentY*/0, metrics.charWidth(line.getCharAt(charNo).getCH()), 15);
-                //  Rectangle2D backgroundColRect = new Rectangle(TextBoxConstants.HORIZONTAL_TEXT_INDENT + indentX, Document.DEFAULT_INDENT_Y + indentY, metrics.charWidth(line.getCharAt(charNo).getCH()), caret.getLine()*15);
+                //Rectangle2D backgroundColRect = new Rectangle(TextBoxConstants.HORIZONTAL_TEXT_INDENT + indentX, Document.DEFAULT_INDENT_Y + indentY, metrics.charWidth(line.getCharAt(charNo).getCH()), caret.getLine()*15);
                 if(isCharSelected(charNo, lineNo)) {
                     Color two = g2.getColor();
                     g2.setColor(selectionColor);
@@ -139,6 +141,7 @@ public class TextPanel extends JPanel {
                 if(lineNo == caret.getLine() && charNo + TextBoxConstants.NEXT_POS_MARKER == caret.getLogicalPosition()) {
                     caretIndentX = indentX/* - 2*margin;0*/;
                     caretFont = fontPair.getFont();
+                    caretHeight = metrics.getHeight();
                 }
             }
             if(lineNo == caret.getLine()) {
@@ -148,8 +151,8 @@ public class TextPanel extends JPanel {
         Color defaultFC = g2.getColor();
         Font defaultFont = g2.getFont();
         g2.setFont(caretFont);
-        caretRectangle = new Rectangle( TextBoxConstants.HORIZONTAL_TEXT_INDENT + caretIndentX - 15 - TextBoxConstants.HORIZONTAL_TEXT_MARGIN, caretIndentY, TextBoxConstants.DEFAULT_HORIZONTAL_SCROLL_INDENT, TextBoxConstants.DEFAULT_VERTICAL_SCROLL_INDENT);
-        g2.drawRect( TextBoxConstants.HORIZONTAL_TEXT_INDENT + caretIndentX - 15 - TextBoxConstants.HORIZONTAL_TEXT_MARGIN, caretIndentY, TextBoxConstants.DEFAULT_HORIZONTAL_SCROLL_INDENT, TextBoxConstants.DEFAULT_VERTICAL_SCROLL_INDENT);
+        caretRectangle = new Rectangle( TextBoxConstants.HORIZONTAL_TEXT_INDENT + caretIndentX - 15 - TextBoxConstants.HORIZONTAL_TEXT_MARGIN, caretIndentY - caretHeight, TextBoxConstants.DEFAULT_HORIZONTAL_SCROLL_INDENT, caretHeight * 2);
+        //g2.drawRect( TextBoxConstants.HORIZONTAL_TEXT_INDENT + caretIndentX - 15 - TextBoxConstants.HORIZONTAL_TEXT_MARGIN, caretIndentY - caretHeight, TextBoxConstants.DEFAULT_HORIZONTAL_SCROLL_INDENT, caretHeight * 2);
         g2.setColor(Color.RED);
         g2.drawString(Character.toString(caret.getCaretSymbol()), TextBoxConstants.HORIZONTAL_TEXT_INDENT + caretIndentX - TextBoxConstants.HORIZONTAL_TEXT_MARGIN, caretIndentY);
 
@@ -474,7 +477,8 @@ public class TextPanel extends JPanel {
                                               );
                     caret.setSingleOutFlag(false);
                 }
-                int[] state = document.pasteSelectedString(caret.getPos(), caret.getLine(), pasteStr);
+                int[] state = document.pasteSelectedString(caret.getLogicalPosition(), caret.getLine(), pasteStr);
+                caret.updateVisiblePos();
                 caret.setLine(state[TextBoxConstants.AFTER_PASTE_CARET_LINE]);
                 caret.setPos(state[TextBoxConstants.AFTER_PASTE_CARET_POS]);
                 scrollNeedUpdate = true;
@@ -518,5 +522,87 @@ public class TextPanel extends JPanel {
         document = new Document();
         caret.setPos(TextBoxConstants.FIRST_SYMBOL_POS);
         caret.setLine(TextBoxConstants.FIRST_LINE_POS);
+        repaint();
+    }
+    public String getText() {
+        int startPos = TextBoxConstants.FIRST_SYMBOL_POS;
+        int startLine = TextBoxConstants.FIRST_LINE_POS;
+        int lastLine = document.getCountOfLines() + TextBoxConstants.LAST_POS_ERROR;
+        int lastPos = document.getLineAt(lastLine).getCountOfChars() + TextBoxConstants.LAST_POS_ERROR;
+
+        return document.copySelectedString(startPos, startLine, lastPos, lastLine);
+    }
+    public String getLine(int line) {
+        int startPos = TextBoxConstants.FIRST_SYMBOL_POS;
+        int lastPos = document.getLineAt(line).getCountOfChars();
+
+        return document.copySelectedString(startPos, line, lastPos, line);
+    }
+    public int getCountOfLines() {
+        return document.getCountOfLines();
+    }
+    public String getFileName() {
+        return fileName;
+    }
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
+    public void setBold() {
+        Font font;
+        int style;
+        if(currentFont.isBold() && currentFont.isItalic())
+            style = Font.ITALIC;
+        else if(currentFont.isBold())
+            style = Font.PLAIN;
+        else if(currentFont.isItalic())
+            style = Font.ITALIC + Font.BOLD;
+        else
+            style = Font.BOLD;
+        font = new Font(currentFont.getName(), style, currentFont.getSize());
+        FontPair fontPair = FontInfo.findFont(font);
+        currentFont = fontPair.getFont();
+        if(caret.isSetSingleOut()) {
+            updateFont(currentFont);
+            repaint();
+        }
+    }
+    public void setItalic() {
+        Font font;
+        int style;
+        if(currentFont.isBold() && currentFont.isItalic())
+            style = Font.BOLD;
+        else if(currentFont.isBold())
+            style = Font.ITALIC + Font.BOLD;
+        else if(currentFont.isItalic())
+            style = Font.PLAIN;
+        else
+            style = Font.ITALIC;
+        font = new Font(currentFont.getName(), style, currentFont.getSize());
+        FontPair fontPair = FontInfo.findFont(font);
+        currentFont = fontPair.getFont();
+        if(caret.isSetSingleOut()) {
+            updateFont(currentFont);
+            repaint();
+        }
+    }
+    public void setFontName(String fontName) {
+        Font font;
+        font = new Font(fontName, currentFont.getStyle(), currentFont.getSize());
+        FontPair fontPair = FontInfo.findFont(font);
+        currentFont = fontPair.getFont();
+        if(caret.isSetSingleOut()) {
+            updateFont(currentFont);
+            repaint();
+        }
+    }
+    public void setFontSize(int fontSize) {
+        Font font;
+        font = new Font(currentFont.getName(), currentFont.getStyle(), fontSize);
+        FontPair fontPair = FontInfo.findFont(font);
+        currentFont = fontPair.getFont();
+        if(caret.isSetSingleOut()) {
+            updateFont(currentFont);
+            repaint();
+        }
     }
 }

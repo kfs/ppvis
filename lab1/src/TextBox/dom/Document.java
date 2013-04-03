@@ -97,6 +97,8 @@ public class Document {
                 pos++;
             }
         }
+        calculateMaxWidthOfLines();
+        calculateMaxHeightOfLines();
         state[0] = line;
         state[1] = pos;
         return state;
@@ -108,6 +110,7 @@ public class Document {
         int maxLineWidth = 0;
         int currLineWidth;
         for (Line line : _lines) {
+            line.calculateLineWidth();
             currLineWidth = line.getWidth();
             if (maxLineWidth < currLineWidth)
                 maxLineWidth = currLineWidth;
