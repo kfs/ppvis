@@ -3,8 +3,10 @@ package TextBox.dom;
 import java.awt.Font;
 
 public class TextBoxConstants {
+    //document constants
     public static final int DEFAULT_LINE_SIZE = 20;
     public static final int DEFAULT_FONT_SIZE = 15;
+    //caret constants
     public static final int NEXT_POS_MARKER = 1;
     public static final int PREV_POS_MARKER = -1;
     public static final int HORIZONTAL_TEXT_MARGIN = 1;

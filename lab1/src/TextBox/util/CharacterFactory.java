@@ -6,13 +6,6 @@ import TextBox.dom.Character;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Created with IntelliJ IDEA.
- * User: lgsferry
- * Date: 30.03.13
- * Time: 16:05
- * To change this template use File | Settings | File Templates.
- */
 public class CharacterFactory {
     protected static Map<Integer, Character> chars = new HashMap<Integer, Character>();
     public static TextBox.dom.Character newChar(char character) {

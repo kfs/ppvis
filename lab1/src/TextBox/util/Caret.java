@@ -5,7 +5,7 @@ import TextBox.dom.TextBoxConstants;
 public class Caret {
     protected static Caret _instance = new Caret();
     protected int pos;
-    protected int visiblePos = -1;
+    protected int visiblePos = TextBoxConstants.VISIBLE_POS_NOT_USED;
     protected int line;
     protected char caretSymbol = '|';
     protected int singleOutStartPos;

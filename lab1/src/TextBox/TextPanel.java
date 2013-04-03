@@ -11,7 +11,7 @@ import java.awt.datatransfer.*;
 import java.io.IOException;
 import java.lang.Character;
 
-public class TextPanel extends JPanel implements UIComponent {
+public class TextPanel extends JPanel {
     /*
      * Constants
      */
@@ -33,24 +33,16 @@ public class TextPanel extends JPanel implements UIComponent {
     protected Rectangle caretRectangle;
 
     protected boolean scrollNeedUpdate;
-   // this.key
-    /*
-     * Overloaded Mehods
-     */
 
-    public void resize() {
-
-    }
-    public void draw() {
-
-    }
+    protected String fileName = "Document";
 
     /*
      * Other methods
      */
 
     public TextPanel() {
-        setAutoscrolls(true);
+        //setAutoscrolls(true);
+        //setTitle(fileName + " - Text Editor, v0.4 beta.");
 
         //initFontInfo();
 //        getGraphics().setFont(currentFont);
@@ -81,28 +73,36 @@ public class TextPanel extends JPanel implements UIComponent {
         Graphics2D g2 = (Graphics2D) g;
 
         String charForDraw;
-
-
-
         int indentX;
         int indentY = 0;
         int caretIndentX = 0;
         int caretIndentY;
 
-
-        FontMetrics metrics = g.getFontMetrics();
+        FontMetrics metrics = g2.getFontMetrics();
         Font caretFont = TextBoxConstants.DEFAULT_FONT;
         Color selectionColor = new Color(137, 189, 245);
 
         caretIndentY = metrics.getHeight();
         g2.setFont(currentFont);
         int lineHeight;
+        int selectionIndent = 0;
         for (int lineNo = 0; lineNo < document.getCountOfLines(); lineNo++) {
             indentX = 0;
 
             Line line = document.getLineAt(lineNo);
             lineHeight = line.getMaxHeight();
             indentY += lineHeight;
+
+            for(int charNo = 0; charNo < line.getCountOfChars(); charNo++) {
+                FontPair fontPair = FontInfo.findFont(line.getFont(charNo));
+                g2.setFont(fontPair.getFont());
+                metrics = fontPair.getFontMetrics();
+                int baselineIndent = metrics.getLeading() + metrics.getDescent();
+
+                if (selectionIndent < baselineIndent) {
+                    selectionIndent = baselineIndent;
+                }
+            }
 
             for(int charNo = 0; charNo < line.getCountOfChars(); charNo++) {
                 //buf += line.getCharAt(charNo).getCH();
@@ -124,7 +124,7 @@ public class TextPanel extends JPanel implements UIComponent {
                     Color two = g2.getColor();
                     g2.setColor(selectionColor);
                     g2.fillRect(TextBoxConstants.HORIZONTAL_TEXT_INDENT + indentX,
-                                indentY - metrics.getHeight() + metrics.getDescent(),
+                                indentY - lineHeight + selectionIndent,
                                 metrics.charWidth(currentChar),
                                 lineHeight
                                 );
@@ -188,6 +188,7 @@ public class TextPanel extends JPanel implements UIComponent {
             );
             caret.setPosAtSelectionLogicalStart();
             caret.setSingleOutFlag(false);
+            scrollNeedUpdate = true;
             repaint();
             return;
         }
@@ -320,6 +321,7 @@ public class TextPanel extends JPanel implements UIComponent {
         caret.setSingleOutEndPos(caret.getPos());
         caret.setSingleOutEndLine(caret.getLine());
         caret.setSingleOutFlag(caret.isSelectionActual());
+        scrollNeedUpdate = true;
         repaint();
     }
     public void singleOutLine(int count) {
@@ -333,6 +335,7 @@ public class TextPanel extends JPanel implements UIComponent {
         changeCaretLineBorders(count);
 
         caret.setSingleOutEndLine(caret.getLine());
+        scrollNeedUpdate = true;
         repaint();
     }
     private boolean isCharSelected(int pos, int line) {
@@ -392,6 +395,7 @@ public class TextPanel extends JPanel implements UIComponent {
                 && pos >= selectionStartPos
                 && pos < selectionEndPos;
     }
+    //font commands
     public void updateFont(Font font) {
         if(caret.isSetSingleOut()) {
             int startLineNum = caret.getSelectionStartLine();
@@ -417,6 +421,7 @@ public class TextPanel extends JPanel implements UIComponent {
                 currLine.calculateLineWidth();
                 currLine.calculateLineHeight();
             }
+            scrollNeedUpdate = true;
             repaint();
         }
         else
@@ -438,6 +443,7 @@ public class TextPanel extends JPanel implements UIComponent {
                 caret.getSelectionEndLine());
         caret.setPos(caret.getSelectionStartPos());
         caret.setSingleOutFlag(false);
+        scrollNeedUpdate = true;
         repaint();
         StringSelection copySelection = new StringSelection(copyStr);
         clipboard.setContents(copySelection, copySelection);
@@ -471,10 +477,12 @@ public class TextPanel extends JPanel implements UIComponent {
                 int[] state = document.pasteSelectedString(caret.getPos(), caret.getLine(), pasteStr);
                 caret.setLine(state[TextBoxConstants.AFTER_PASTE_CARET_LINE]);
                 caret.setPos(state[TextBoxConstants.AFTER_PASTE_CARET_POS]);
+                scrollNeedUpdate = true;
                 repaint();
             }
         }
     }
+    //scroll commands
     public void updateScrollPane() {
         int panelWidth = document.calculateMaxWidthOfLines() + TextBoxConstants.DEFAULT_HORIZONTAL_SCROLL_INDENT;
         int panelHeight = document.calculateMaxHeightOfLines() + TextBoxConstants.DEFAULT_VERTICAL_SCROLL_INDENT;
@@ -505,5 +513,10 @@ public class TextPanel extends JPanel implements UIComponent {
             scrollNeedUpdate = false;
             repaint();
         }
+    }
+    public void newDocument() {
+        document = new Document();
+        caret.setPos(TextBoxConstants.FIRST_SYMBOL_POS);
+        caret.setLine(TextBoxConstants.FIRST_LINE_POS);
     }
 }
