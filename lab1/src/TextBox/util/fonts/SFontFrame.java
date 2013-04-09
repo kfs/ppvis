@@ -1,6 +1,8 @@
-package TextBox.util;
+package TextBox.util.fonts;
 
 import TextBox.TextPanel;
+import TextBox.util.FontInfo;
+import TextBox.util.FontPair;
 
 import javax.swing.*;
 import java.awt.*;
@@ -8,22 +10,17 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 public class SFontFrame extends JFrame {
-    protected JList fontList;
-    protected JList sizeList;
-    protected JPanel panel;
-    protected JButton btnApply;
-    protected JButton btnCancel;
-    protected JCheckBox chkBold;
-    protected JCheckBox chkItalic;
-    protected TextPanel textView;
+    private JList fontList;
+    private JList sizeList;
+    private JPanel panel;
+    private JButton btnApply;
+    private JButton btnCancel;
+    private JCheckBox chkBold;
+    private JCheckBox chkItalic;
+    private TextPanel textView;
 
-    protected Font resultFont;
-    protected String resultFontID;
-
-    protected String fontSizes[] = {"4", "6", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19",
-            "20", "24", "30", "36", "40", "48", "60", "72"};
-    protected String fontNames[] = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
-
+    private Font resultFont;
+    private String resultFontID;
 
     public SFontFrame() {
         setSize(250, 300);
@@ -37,15 +34,15 @@ public class SFontFrame extends JFrame {
         int defaultFontIndex = 0;
         int defaultSizeIndex = 9;
 
-        fontList = new JList(fontNames);
-        for (int currFontIndex = 0; currFontIndex < fontNames.length; currFontIndex++) {
-            if (fontNames[currFontIndex].equals("Serif")) {
+        fontList = new JList(FontConstants.fontNames);
+        for (int currFontIndex = 0; currFontIndex < FontConstants.fontNames.length; currFontIndex++) {
+            if (FontConstants.fontNames[currFontIndex].equals("Serif")) {
                 defaultFontIndex = currFontIndex;
                 break;
             }
         }
         fontList.setSelectedIndex(defaultFontIndex);
-        sizeList = new JList(fontSizes);
+        sizeList = new JList(FontConstants.fontSizes);
         sizeList.setSelectedIndex(defaultSizeIndex);
 
         JScrollPane fontScroll = new JScrollPane(fontList);
@@ -72,7 +69,7 @@ public class SFontFrame extends JFrame {
                 else
                     style = Font.PLAIN;
                 resultFontID = fontName + '-' + style + '-' + size;
-                System.out.println(resultFontID);
+//                System.out.println(resultFontID);
                 FontPair fontPair = FontInfo.findFont(resultFontID);
                 if(fontPair == null) {
                     resultFont = new Font(fontName, style, size);

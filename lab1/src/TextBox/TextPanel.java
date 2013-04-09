@@ -10,8 +10,11 @@ import java.awt.*;
 import java.awt.datatransfer.*;
 import java.io.IOException;
 import java.lang.Character;
+import org.apache.log4j.Logger;
 
 public class TextPanel extends JPanel {
+
+    public static final Logger LOGGER = Logger.getLogger(TextPanel.class);
     /*
      * Constants
      */
@@ -22,19 +25,19 @@ public class TextPanel extends JPanel {
     /*
      * Vars
      */
-    protected Document document = new Document();
+    private Document document = new Document();
 
-    protected Caret caret = Caret.Instance();
+    private Caret caret = Caret.Instance();
 
-    protected Font currentFont = new Font("Serif", Font.PLAIN, 15);
+    private Font currentFont = new Font("Serif", Font.PLAIN, 15);
 
-    protected Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+    private Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
 
-    protected Rectangle caretRectangle;
+    private Rectangle caretRectangle;
 
-    protected boolean scrollNeedUpdate;
+    private boolean scrollNeedUpdate;
 
-    protected String fileName = "Document";
+    private String fileName = "Document";
 
     /*
      * Other methods
@@ -257,7 +260,7 @@ public class TextPanel extends JPanel {
         repaint();
         //updateScrollPane(caretRectangle);
     }
-    protected void changeCaretPosBorders(int count) {
+    private void changeCaretPosBorders(int count) {
         // left
 
         if(caret.getPos() + count >= TextBoxConstants.FIRST_SYMBOL_POS && caret.getPos() + count <= document.getLineAt(caret.getLine()).getCountOfChars())
@@ -281,7 +284,7 @@ public class TextPanel extends JPanel {
         repaint();
 //        updateScrollPane(caretRectangle);
     }
-    protected void changeCaretLineBorders(int count) {
+    private void changeCaretLineBorders(int count) {
         //up
         //up when 1st(0) line
         if(count < 0 && caret.getLine() == TextBoxConstants.FIRST_LINE_POS)
@@ -461,14 +464,12 @@ public class TextPanel extends JPanel {
                 pasteStr = (String) contents.getTransferData(DataFlavor.stringFlavor);
             }
             catch (UnsupportedFlavorException exception) {
-//                System.out.println(exception);
-//                exception.printStackTrace();
+                LOGGER.error(exception);
             }
             catch (IOException exception) {
-//                System.out.println(exception);
-//                exception.printStackTrace();
+                LOGGER.error(exception);
             }
-            if(!pasteStr.equals("")) {
+            if(!"".equals(pasteStr)) {
                 if(caret.isSetSingleOut()) {
                     document.cutSelectedString( caret.getSelectionStartPos(),
                                                 caret.getSelectionStartLine(),
@@ -485,6 +486,9 @@ public class TextPanel extends JPanel {
                 repaint();
             }
         }
+    }
+    public void pasteString(int pos, int line, String string) {
+        document.pasteSelectedString(pos, line, string);
     }
     //scroll commands
     public void updateScrollPane() {
@@ -511,7 +515,7 @@ public class TextPanel extends JPanel {
                 //|| (panelHeight > panelVisibleHeight && panelHeight > getWidth())
                 || (panelHeight < getHeight() && panelVisibleHeight < getHeight());
     }
-    protected void checkScrollUpdate() {
+    private void checkScrollUpdate() {
         if(scrollNeedUpdate) {
             updateScrollPane();
             scrollNeedUpdate = false;

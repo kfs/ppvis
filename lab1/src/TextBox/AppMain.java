@@ -3,53 +3,290 @@ package TextBox;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 import javax.swing.*;
 
 import TextBox.dom.TextBoxConstants;
 import TextBox.util.Caret;
 import TextBox.util.CharacterFactory;
-import TextBox.util.SFontFrame;
+import TextBox.util.fonts.FontConstants;
+import TextBox.util.fonts.SFontFrame;
+import org.apache.log4j.Logger;
 
+//i18n -\ResourceBundle -\\ascii - \u1212
+//log4j
 public class AppMain {
+    public static String textName;
+    public static String docName;
+    public static final Logger LOGGER = Logger.getLogger(AppMain.class);
     public static void main(String[] args) {
+        setSystemLookAndFeel();
+        WndFrame wndFrame = addTextPanel();
+        setLocale(args, wndFrame);
+    }
+    private static void setLocale(String[] args, WndFrame frame) {
+        String language;
+        String country;
+        if(args.length != 2) {
+            language = new String("en");
+            country = new String("GB");
+        } else {
+            language = new String(args[0]);
+            country = new String(args[1]);
+        }
+
+        Locale currentLocale;
+        ResourceBundle messages;
+        currentLocale = new Locale(language, country);
+        messages = ResourceBundle.getBundle("TextBox/locale/MessagesBundle", currentLocale);
+        textName = messages.getString(TextBoxConstants.LOCALE_EDITOR_TITLE);
+        docName = messages.getString(TextBoxConstants.LOCALE_DOC_TITLE);
+        frame.setTitle(docName + " - " + textName);
+    }
+    private static void setSystemLookAndFeel() {
         try {
             javax.swing.UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         }
         catch (UnsupportedLookAndFeelException e) {
-            // handle exception
+            LOGGER.error(e);
         }
         catch (ClassNotFoundException e) {
-            // handle exception
+            LOGGER.error(e);
         }
         catch (InstantiationException e) {
-            // handle exception
+            LOGGER.error(e);
         }
         catch (IllegalAccessException e) {
-            // handle exception
+            LOGGER.error(e);
         }
+    }
+    static private WndFrame addTextPanel() {
         WndFrame frame = new WndFrame();
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setVisible(true);
         frame.initPanelUI();
+        return frame;
     }
 }
 
 @SuppressWarnings("serial")
 class WndFrame extends JFrame {
+    public static final Logger LOGGER = Logger.getLogger(OpenFileAdapter.class);
     TextPanel textPanel;
+
     SFontFrame fontChooser = new SFontFrame();
+
+    class OpenFileAdapter extends MouseAdapter {
+        TextPanel panel;
+        OpenFileAdapter(TextPanel panel) {
+            this.panel = panel;
+        }
+        @Override
+        public void mousePressed(MouseEvent e) {
+            panel.newDocument();
+            JFileChooser fileChooser = new JFileChooser();
+            int returnVal = fileChooser.showOpenDialog(null);
+            if(returnVal == JFileChooser.APPROVE_OPTION) {
+                try {
+                    FileReader fileReader = new FileReader(fileChooser.getSelectedFile());
+                    BufferedReader bufferedReader = new BufferedReader(fileReader);
+                    String document = "";
+                    String line;
+                    while((line = bufferedReader.readLine()) != null) {
+                        document += line + '\n';
+                    }
+                    panel.pasteString(TextBoxConstants.FIRST_SYMBOL_POS, TextBoxConstants.FIRST_LINE_POS, document);
+                    //panel.document.calculateMaxWidthOfLines();
+                    panel.updateScrollPane();
+                    panel.repaint();
+                }
+                catch (IOException exception) {
+                    LOGGER.error(exception);
+                }
+            }
+        }
+    }
+    class SaveFileAdapter extends MouseAdapter {
+        TextPanel panel;
+        SaveFileAdapter(TextPanel panel) {
+            this.panel = panel;
+        }
+        @Override
+        public void mousePressed(MouseEvent e) {
+            ///
+            JFileChooser fileChooser = new JFileChooser();
+            int returnVal = fileChooser.showSaveDialog(null);
+            if(returnVal == JFileChooser.APPROVE_OPTION)
+                try{
+                    File saveFile = fileChooser.getSelectedFile();
+                    String fileName = fileChooser.getName(saveFile);
+                    String filePath = saveFile.getAbsolutePath();
+
+                    if(!saveFile.exists()){
+                        BufferedWriter out = new BufferedWriter(new FileWriter(saveFile));
+                        int countOfLines = panel.getCountOfLines();
+                        for (int currLine = 0; currLine < countOfLines; currLine++) {
+                            out.write(panel.getLine(currLine));
+                            out.newLine();
+                        }
+                        panel.setFileName(fileName);
+                        out.close();
+                    }
+                    else{
+                        String message = "File  \'" + fileName + "\' already exist in \n" + filePath + ":\n" + "Do you want to overwrite?";
+                        String title = "Warning";
+                        int reply = JOptionPane.showConfirmDialog(null, message, title, JOptionPane.YES_NO_OPTION);
+                        if(reply == JOptionPane.YES_OPTION){
+                            BufferedWriter out = new BufferedWriter(new FileWriter(saveFile));
+                            int countOfLines = panel.getCountOfLines();
+                            for (int currLine = 0; currLine < countOfLines; currLine++) {
+                                out.write(panel.getLine(currLine));
+                                out.newLine();
+                            }
+                            out.close();
+                            JOptionPane.showMessageDialog(null, "File \'" + fileName + "\' overwritten successfully in \n" + filePath);
+
+                        }
+                    }
+                }
+                catch(IOException exception){
+                    LOGGER.error(exception);
+                }
+        }
+    }
+    class FontMouseEvent extends MouseAdapter {
+        @Override
+        public void mousePressed(MouseEvent e) {
+            fontChooser.chooseFont(textPanel);
+        }
+    }
+    class NewDocEvent extends MouseAdapter {
+        @Override
+        public void mousePressed(MouseEvent e) {
+            textPanel.newDocument();
+        }
+    }
+    class KeyEventAdapter implements KeyListener {
+        TextPanel panel;
+        KeyEventAdapter(TextPanel panel) {
+            this.panel = panel;
+        }
+        @Override
+        public void keyTyped(KeyEvent e) {
+            Caret caret = Caret.Instance();
+            ///if(!e.isControlDown()) {
+            switch (e.getKeyChar()) {
+                case TextBoxConstants.BACK_SPACE_SYMBOL:
+                    panel.charDelete(); //handle caret selection
+                    if (caret.isSetSingleOut())
+                        caret.setSingleOutFlag(false);
+                    break;
+                case TextBoxConstants.DELETE_SYMBOL:
+                    //just for test
+                    //panel.changeCaretPos(3);
+                    //just for test
+                    break;
+                case TextBoxConstants.NEW_LINE_SYMBOL:
+                    panel.newLine(); //handle caret selection
+                    if (caret.isSetSingleOut())
+                        caret.setSingleOutFlag(false);
+                    break;
+                case TextBoxConstants.CONTROL_X_CUT_SEQUENCE:
+                    panel.cutToClipboard();
+                    break;
+                case TextBoxConstants.CONTROL_V_PASTE_SEQUENCE:
+                    panel.pasteFromClipboard();
+                    break;
+                case TextBoxConstants.CONTROL_C_COPY_SEQUENCE:
+                    panel.copyToClipboard();
+                    break;
+                default:
+                    TextBox.dom.Character character = CharacterFactory.newChar(e.getKeyChar());
+                    panel.keyPressedWithValue(character);
+                    panel.repaint();
+            }
+        }
+        @Override
+        public void keyPressed(KeyEvent e) {
+            // VK_RIGHT, VK_LEFT, VK_TOP, VK_DOWN events HERE.
+            if (e.isShiftDown()) {
+                switch (e.getKeyCode()) {
+                    case KeyEvent.VK_UP:
+                        panel.singleOutLine(TextBoxConstants.PREV_POS_MARKER);
+                        break;
+                    case KeyEvent.VK_DOWN:
+                        panel.singleOutLine(TextBoxConstants.NEXT_POS_MARKER);
+                        break;
+                    case KeyEvent.VK_LEFT:
+                        panel.singleOutPos(TextBoxConstants.PREV_POS_MARKER);
+                        break;
+                    case KeyEvent.VK_RIGHT:
+                        panel.singleOutPos(TextBoxConstants.NEXT_POS_MARKER);
+                        break;
+                }
+            } else {
+                switch (e.getKeyCode()) {
+                    case KeyEvent.VK_UP:
+                        panel.changeCaretLine(TextBoxConstants.PREV_POS_MARKER);
+                        break;
+                    case KeyEvent.VK_DOWN:
+                        panel.changeCaretLine(TextBoxConstants.NEXT_POS_MARKER);
+                        break;
+                    case KeyEvent.VK_LEFT:
+                        panel.changeCaretPos(TextBoxConstants.PREV_POS_MARKER);
+                        break;
+                    case KeyEvent.VK_RIGHT:
+                        panel.changeCaretPos(TextBoxConstants.NEXT_POS_MARKER);
+                        break;
+                }
+            }
+        }
+        @Override
+        public void keyReleased(KeyEvent e) {
+        }
+    }
+
     public WndFrame() {
-        /*
-         * Set default props
-         */
+        initTextPanel();
+        initMenu();
+        initToolBar();
+        initScrollPane();
+        initDefaultSettings();
+    }
+    public void initPanelUI() {
+        textPanel.initFontInfo();
+    }
+    private void initTextPanel() {
+        textPanel = new TextPanel();
+        textPanel.setFocusable(true);
+        textPanel.setBackground(Color.WHITE);
+        textPanel.requestFocusInWindow();
+        //textPanel.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+        textPanel.addKeyListener(new KeyEventAdapter(textPanel));
+        //textPanel.add(toolBar, BorderLayout.PAGE_START);
 
-
-
-        /*
-         * Menu
-         */
-
+    }
+    class CutEvent extends MouseAdapter {
+        @Override
+        public void mousePressed(MouseEvent e) {
+            textPanel.cutToClipboard();
+        }
+    }
+    class CopyEvent extends MouseAdapter {
+        @Override
+        public void mousePressed(MouseEvent e) {
+            textPanel.copyToClipboard();
+        }
+    }
+    class PasteEvent extends MouseAdapter {
+        @Override
+        public void mousePressed(MouseEvent e) {
+            textPanel.pasteFromClipboard();
+        }
+    }
+    private void initMenu() {
         JMenuBar menu = new JMenuBar();
         setJMenuBar(menu);
 
@@ -59,11 +296,15 @@ class WndFrame extends JFrame {
         file.setMnemonic(KeyEvent.VK_F);
         menu.add(file);
         JMenuItem mCreate = new JMenuItem("New...", new ImageIcon("imgs/new.png"));
+        mCreate.addMouseListener(new NewDocEvent());
         JMenuItem mOpen = new JMenuItem("Open...", new ImageIcon("imgs/open.png"));
+        mOpen.addMouseListener(new OpenFileAdapter(textPanel));
         JMenuItem mSave = new JMenuItem("Save", new ImageIcon("imgs/save.png"));
+        mSave.addMouseListener(new SaveFileAdapter(textPanel));
         mSave.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_MASK));
         JMenuItem mSaveAs = new JMenuItem("Save As...", new ImageIcon("imgs/saveas.png"));
         mSaveAs.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_MASK + InputEvent.SHIFT_MASK));
+        mSaveAs.addMouseListener(new SaveFileAdapter(textPanel));
         JMenuItem mExit = new JMenuItem("Exit", new ImageIcon("imgs/exit.png"));
         file.add(mCreate);
         file.add(mOpen);
@@ -78,14 +319,18 @@ class WndFrame extends JFrame {
         JMenu edit = new JMenu("Edit");
         menu.add(edit);
         JMenuItem mNewFont = new JMenuItem("Change font");
+        mNewFont.addMouseListener(new FontMouseEvent());
         mNewFont.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.CTRL_MASK));
 //        JMenuItem mRedo = new JMenuItem("Redo");
 //        mRedo.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_MASK));
         JMenuItem mCut = new JMenuItem("Cut", new ImageIcon("imgs/cut.png"));
+        mCut.addMouseListener(new CutEvent());
         mCut.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X, InputEvent.CTRL_MASK));
         JMenuItem mCopy = new JMenuItem("Copy", new ImageIcon("imgs/copy.png"));
+        mCopy.addMouseListener(new CopyEvent());
         mCopy.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_MASK));
         JMenuItem mPaste = new JMenuItem("Paste", new ImageIcon("imgs/paste.png"));
+        mPaste.addMouseListener(new PasteEvent());
         mPaste.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V, InputEvent.CTRL_MASK));
         edit.add(mNewFont);
 //        edit.add(mRedo);
@@ -94,9 +339,8 @@ class WndFrame extends JFrame {
         edit.add(mCopy);
         edit.add(mPaste);
 
-
-        final TextPanel panel = new TextPanel();
-
+    }
+    private void initToolBar() {
         /*
          * Toolbar
          */
@@ -110,7 +354,7 @@ class WndFrame extends JFrame {
         jbtn.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                fontChooser.chooseFont(panel);
+                fontChooser.chooseFont(textPanel);
             }
         });
         jbtn.setFocusable(false);
@@ -128,95 +372,17 @@ class WndFrame extends JFrame {
         toolBar.addSeparator();
 
         JButton newFile = new JButton(new ImageIcon("imgs/new.png"));
-        newFile.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mousePressed(MouseEvent e) {
-                panel.newDocument();
-            }
-        });
+        newFile.addMouseListener(new NewDocEvent());
         newFile.setFocusable(false);
         toolBar.add(newFile);
         JButton openFile = new JButton(new ImageIcon("imgs/open.png"));
-        openFile.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mousePressed(MouseEvent e) {
-                panel.newDocument();
-                JFileChooser fileChooser = new JFileChooser();
-                int returnVal = fileChooser.showOpenDialog(null);
-                if(returnVal == JFileChooser.APPROVE_OPTION) {
-                    try {
-                        FileReader fileReader = new FileReader(fileChooser.getSelectedFile());
-                        BufferedReader bufferedReader = new BufferedReader(fileReader);
-                        String document = "";
-                        String line;
-                        while((line = bufferedReader.readLine()) != null) {
-                            document += line + '\n';
-                            System.out.println(line);
-                        }
-                        panel.document.pasteSelectedString(TextBoxConstants.FIRST_SYMBOL_POS, TextBoxConstants.FIRST_LINE_POS, document);
-                        panel.document.calculateMaxWidthOfLines();
-                        panel.updateScrollPane();
-                        panel.repaint();
-    //                    System.out.println(openFile.toString());
-    //                    if(openFile.canRead()) {
-
-                        //}
-                    }
-                    catch (IOException exception) {
-                        System.out.println(exception);
-                    }
-                }
-            }
-        });
+        openFile.addMouseListener(new OpenFileAdapter(textPanel));
         openFile.setFocusable(false);
         toolBar.add(openFile);
 
         JButton saveFile = new JButton(new ImageIcon("imgs/save.png"));
         saveFile.setFocusable(false);
-        saveFile.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mousePressed(MouseEvent e) {
-                ///
-                JFileChooser fileChooser = new JFileChooser();
-                int returnVal = fileChooser.showSaveDialog(null);
-                if(returnVal == JFileChooser.APPROVE_OPTION)
-                    try{
-                        File saveFile = fileChooser.getSelectedFile();
-                        String fileName = fileChooser.getName(saveFile);
-                        String filePath = saveFile.getAbsolutePath();
-
-                        if(!saveFile.exists()){
-                            BufferedWriter out = new BufferedWriter(new FileWriter(saveFile));
-                            int countOfLines = panel.getCountOfLines();
-                            for (int currLine = 0; currLine < countOfLines; currLine++) {
-                                out.write(panel.getLine(currLine));
-                                out.newLine();
-                            }
-                            panel.setFileName(fileName);
-                            out.close();
-                        }
-                        else{
-                            String message = "File  \'" + fileName + "\' already exist in \n" + filePath + ":\n" + "Do you want to overwrite?";
-                            String title = "Warning";
-                            int reply = JOptionPane.showConfirmDialog(null, message, title, JOptionPane.YES_NO_OPTION);
-                            if(reply == JOptionPane.YES_OPTION){
-                                BufferedWriter out = new BufferedWriter(new FileWriter(saveFile));
-                                int countOfLines = panel.getCountOfLines();
-                                for (int currLine = 0; currLine < countOfLines; currLine++) {
-                                    out.write(panel.getLine(currLine));
-                                    out.newLine();
-                                }
-                                out.close();
-                                JOptionPane.showMessageDialog(null, "File \'" + fileName + "\' overwritten successfully in \n" + filePath);
-
-                            }
-                        }
-                    }
-                    catch(IOException exception){
-                        System.out.println(exception);
-                    }
-            }
-        });
+        saveFile.addMouseListener(new SaveFileAdapter(textPanel));
         toolBar.add(saveFile);
 
         JButton saveFileAs = new JButton(new ImageIcon("imgs/saveas.png"));
@@ -229,7 +395,7 @@ class WndFrame extends JFrame {
         fontBold.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                panel.setBold();
+                textPanel.setBold();
             }
         });
         toolBar.add(fontBold);
@@ -239,27 +405,26 @@ class WndFrame extends JFrame {
         fontItalic.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                panel.setItalic();
+                textPanel.setItalic();
             }
         });
         toolBar.add(fontItalic);
 
-        final JComboBox fontName = new JComboBox(GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames());
+        final JComboBox fontName = new JComboBox(FontConstants.fontNames);
         fontName.setFocusable(false);
         fontName.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent e) {
                 if (e.getStateChange() == ItemEvent.SELECTED) {
                     Object item = e.getItem();
-                    panel.setFontName((String) item);
+                    textPanel.setFontName((String) item);
                 }
             }
         });
         toolBar.add(fontName);
 
-        String fontSizes[] = {"4", "6", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19",
-                "20", "24", "30", "36", "40", "48", "60", "72"};
-        final JComboBox fontSize = new JComboBox(fontSizes);
+
+        final JComboBox fontSize = new JComboBox(FontConstants.fontSizes);
         fontSize.setSelectedIndex(9);
         fontSize.setFocusable(false);
         fontSize.addItemListener(new ItemListener() {
@@ -267,109 +432,22 @@ class WndFrame extends JFrame {
             public void itemStateChanged(ItemEvent e) {
                 if (e.getStateChange() == ItemEvent.SELECTED) {
                     Object item = e.getItem();
-                    panel.setFontSize(Integer.parseInt((String) item));
+                    textPanel.setFontSize(Integer.parseInt((String) item));
                 }
             }
         });
         toolBar.add(fontSize);
 
-        //
-
-        /*
-         * Panel with text editor
-         */
-
-
-        textPanel = panel;
-        panel.setFocusable(true);
-        panel.setBackground(Color.WHITE);
-        panel.requestFocusInWindow();
-        //panel.setBorder(BorderFactory.createLineBorder(Color.GRAY));
-        panel.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyTyped(KeyEvent e) {
-                Caret caret = Caret.Instance();
-                ///if(!e.isControlDown()) {
-                    switch (e.getKeyChar()) {
-                        case TextBoxConstants.BACK_SPACE_SYMBOL:
-                            panel.charDelete(); //handle caret selection
-                            if (caret.isSetSingleOut())
-                                caret.setSingleOutFlag(false);
-                            break;
-                        case TextBoxConstants.DELETE_SYMBOL:
-                            //just for test
-                            //panel.changeCaretPos(3);
-                            //just for test
-                            break;
-                        case TextBoxConstants.NEW_LINE_SYMBOL:
-                            panel.newLine(); //handle caret selection
-                            if (caret.isSetSingleOut())
-                                caret.setSingleOutFlag(false);
-                            break;
-                        case TextBoxConstants.CONTROL_X_CUT_SEQUENCE:
-                            panel.cutToClipboard();
-                            break;
-                        case TextBoxConstants.CONTROL_V_PASTE_SEQUENCE:
-                            panel.pasteFromClipboard();
-                            break;
-                        case TextBoxConstants.CONTROL_C_COPY_SEQUENCE:
-                            panel.copyToClipboard();
-                            break;
-                        default:
-                            TextBox.dom.Character character = CharacterFactory.newChar(e.getKeyChar());
-                            panel.keyPressedWithValue(character);
-                            panel.repaint();
-                    }
-            }
-
-            @Override
-            public void keyPressed(KeyEvent e) {
-                // VK_RIGHT, VK_LEFT, VK_TOP, VK_DOWN events HERE.
-                if (e.isShiftDown()) {
-                    switch (e.getKeyCode()) {
-                        case KeyEvent.VK_UP:
-                            panel.singleOutLine(TextBoxConstants.PREV_POS_MARKER);
-                            break;
-                        case KeyEvent.VK_DOWN:
-                            panel.singleOutLine(TextBoxConstants.NEXT_POS_MARKER);
-                            break;
-                        case KeyEvent.VK_LEFT:
-                            panel.singleOutPos(TextBoxConstants.PREV_POS_MARKER);
-                            break;
-                        case KeyEvent.VK_RIGHT:
-                            panel.singleOutPos(TextBoxConstants.NEXT_POS_MARKER);
-                            break;
-                    }
-                } else {
-                    switch (e.getKeyCode()) {
-                        case KeyEvent.VK_UP:
-                            panel.changeCaretLine(TextBoxConstants.PREV_POS_MARKER);
-                            break;
-                        case KeyEvent.VK_DOWN:
-                            panel.changeCaretLine(TextBoxConstants.NEXT_POS_MARKER);
-                            break;
-                        case KeyEvent.VK_LEFT:
-                            panel.changeCaretPos(TextBoxConstants.PREV_POS_MARKER);
-                            break;
-                        case KeyEvent.VK_RIGHT:
-                            panel.changeCaretPos(TextBoxConstants.NEXT_POS_MARKER);
-                            break;
-                    }
-                }
-            }
-        });
-        //panel.add(toolBar, BorderLayout.PAGE_START);
         add(toolBar,BorderLayout.PAGE_START);
-        JScrollPane sp = new JScrollPane(panel, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
+    }
+    private void initScrollPane() {
+        JScrollPane sp = new JScrollPane(textPanel, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
         sp.setBorder(null);
         sp.createHorizontalScrollBar();
         add(sp);
-        panel.requestFocusInWindow();
-        setTitle(textPanel.fileName + " - Text Editor, v0.5 beta.");
-        setSize(TextPanel.DEFAULT_TEXT_PANEL_WIDTH, TextPanel.DEFAULT_TEXT_PANEL_HEIGHT);
-
     }
-    public void initPanelUI() {
-        textPanel.initFontInfo();
+    private void initDefaultSettings() {
+//        setTitle(textPanel.getFileName() + " - Text Editor, v0.6 rc.");
+        setSize(TextPanel.DEFAULT_TEXT_PANEL_WIDTH, TextPanel.DEFAULT_TEXT_PANEL_HEIGHT);
     }
 }

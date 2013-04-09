@@ -6,7 +6,8 @@ import java.awt.*;
 import java.util.Vector;
 
 public class Document {
-    private Vector<Line> _lines = new Vector<Line>();
+    private Vector<Line> _lines = new Vector<Line>(); //ArrayList
+                                                      //--java.util.concurrent
 
     public Document() {
         Line line = new Line();
@@ -32,11 +33,13 @@ public class Document {
     }
     public String copySelectedString(int startPos, int startLine, int endPos, int endLine) {
         String temp = "";
+        //StringBuilder,StringBuffer
         if(startLine == endLine && startPos == endPos) return temp;
 
         for(int currentLine = startLine; currentLine <= endLine; currentLine++ ) {
             Line strLine = _lines.get(currentLine);
             int countOfChars = strLine.getCountOfChars();
+
             for(int currentPos = currentLine == startLine ? startPos : 0 ;
                         currentPos < (currentLine == endLine ? endPos : countOfChars) ;
                         currentPos++) {

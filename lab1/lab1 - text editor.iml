@@ -7,6 +7,23 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://D:/work/JDK-7u13/apache-log4j-1.2.17/log4j-1.2.17.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="file://D:/work/JDK-7u13/apache-log4j-1.2.17/site/apidocs" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="file://D:/work/JDK-7u13/apache-log4j-1.2.17/contribs/CekiGulcu" />
+          <root url="file://D:/work/JDK-7u13/apache-log4j-1.2.17/contribs/Jamie Tsao" />
+          <root url="file://D:/work/JDK-7u13/apache-log4j-1.2.17/contribs/JimMoore" />
+          <root url="file://D:/work/JDK-7u13/apache-log4j-1.2.17/contribs/ThomasFenner" />
+          <root url="file://D:/work/JDK-7u13/apache-log4j-1.2.17" />
+        </SOURCES>
+      </library>
+    </orderEntry>
   </component>
 </module>
 

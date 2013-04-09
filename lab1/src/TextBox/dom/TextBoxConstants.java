@@ -4,6 +4,11 @@ import java.awt.Font;
 
 public class TextBoxConstants {
     //document constants
+    //enum
+//    enum CarrentConstant{
+//        ;
+//    }
+
     public static final int DEFAULT_LINE_SIZE = 20;
     public static final int DEFAULT_FONT_SIZE = 15;
     //caret constants
@@ -33,6 +38,10 @@ public class TextBoxConstants {
     public static final int AFTER_PASTE_CARET_POS = 1;
 
     public static final Font DEFAULT_FONT = new Font("Serif", Font.PLAIN, DEFAULT_FONT_SIZE);
+
+    //locale constants
+    public static final String LOCALE_EDITOR_TITLE = "editorTitle";
+    public static final String LOCALE_DOC_TITLE = "defaultDocumentTitle";
 
     private TextBoxConstants() {}
 }
