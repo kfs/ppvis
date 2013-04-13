@@ -1,4 +1,4 @@
-package appui.userInterfaceDialogs;
+package appui.xmldb.utils;
 
 public class AppConstants {
     public static final String APP_HEADER = "editorTitle";

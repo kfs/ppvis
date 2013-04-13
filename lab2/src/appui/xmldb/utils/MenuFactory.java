@@ -1,7 +1,4 @@
-package appui.userInterfaceDialogs.events.menuInit;
-
-import java.util.HashMap;
-import java.util.Map;
+package appui.xmldb.utils;
 
 public class MenuFactory {
    // private static Map<> = new HashMap<>();

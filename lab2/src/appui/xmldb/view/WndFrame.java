@@ -1,4 +1,6 @@
-package appui.userInterfaceDialogs;
+package appui.xmldb.view;
+
+import appui.xmldb.utils.AppConstants;
 
 import javax.swing.JFrame;
 
