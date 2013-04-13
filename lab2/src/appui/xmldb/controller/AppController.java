@@ -1,6 +1,5 @@
 package appui.xmldb.controller;
 
-import appui.xmldb.utils.AppConstants;
 import appui.xmldb.view.WndFrame;
 import org.apache.log4j.Logger;
 
@@ -10,16 +9,17 @@ import java.util.ResourceBundle;
 
 public class AppController {
     private static WndFrame appFrame;
-    private static String frameTitle;
+    private static Locale locale;
+    private static ResourceBundle bundle;
     public static final Logger APP_LOGGER = Logger.getLogger("ApplicationLogger");
 
     private AppController() {
 
     }
     public static void initApplication(String[] args) {
+        setLocale(args);
         setSystemLookAndFeel();
         addDialogPanel();
-        setLocale(args, appFrame);
     }
     private static void setSystemLookAndFeel() {
         try {
@@ -38,7 +38,7 @@ public class AppController {
             APP_LOGGER.error(e);
         }
     }
-    private static void setLocale(String[] args, WndFrame frame) {
+    private static void setLocale(String[] args) {
         String language;
         String country;
         Locale currentLocale;
@@ -49,14 +49,20 @@ public class AppController {
             country = new String(args[1]);
             currentLocale = new Locale(language, country);
         }
-        ResourceBundle messages;
-        messages = ResourceBundle.getBundle("appui/xmldb/utils/locale/MessagesBundle", currentLocale);
-        frameTitle = messages.getString(AppConstants.APP_HEADER);
-        frame.setTitle(frameTitle);
+        locale = currentLocale;
+//        appFrame.setLocale(locale);
+        bundle = ResourceBundle.getBundle("appui/xmldb/utils/locale/MessagesBundle", currentLocale);
     }
     private static void addDialogPanel() {
         appFrame = new WndFrame();
+        appFrame.setLocale(locale);
         appFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         appFrame.setVisible(true);
+    }
+    public static Locale getLocale() {
+        return locale;
+    }
+    public static ResourceBundle getBundle() {
+        return bundle;
     }
 }

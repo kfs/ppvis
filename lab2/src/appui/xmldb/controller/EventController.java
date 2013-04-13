@@ -11,15 +11,27 @@ public class EventController {
 
     }
     public static ActionListener getListener(NavigationItem item, WndFrame wndFrame) {
-        String itemName = item.getText();
+        String itemName = item.getItemName();
         if (EventConstants.OPEN_FILE.equals(itemName)) {
             return new OpenAction();
         }
         else if (EventConstants.SAVE_FILE.equals(itemName)) {
             return new SaveAction();
         }
+        else if (EventConstants.EXIT.equals(itemName)) {
+            return new SaveAction();
+        }
+        else if (EventConstants.ADD.equals(itemName)) {
+            return new SaveAction();
+        }
+        else if (EventConstants.DELETE.equals(itemName)) {
+            return new SaveAction();
+        }
+        else if (EventConstants.FIND.equals(itemName)) {
+            return new SaveAction();
+        }
         else {
-        return  null;
+            return  null;
         }
     }
     private static class OpenAction implements ActionListener {
@@ -29,6 +41,30 @@ public class EventController {
         }
     }
     private static class SaveAction implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent event) {
+
+        }
+    }
+    private static class ExitAction implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent event) {
+
+        }
+    }
+    private static class AddAction implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent event) {
+
+        }
+    }
+    private static class DeleteAction implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent event) {
+
+        }
+    }
+    private static class FindAction implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent event) {
 
