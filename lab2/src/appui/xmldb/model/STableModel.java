@@ -1,6 +1,8 @@
 package appui.xmldb.model;
 
 import javax.swing.table.AbstractTableModel;
+import java.util.ArrayList;
+import java.util.List;
 
 public class STableModel extends AbstractTableModel {
     private String[] columnNames = {"Stud's Name",
@@ -11,49 +13,46 @@ public class STableModel extends AbstractTableModel {
             "Count of Brothers",
             "Count of Sisters"
     };
-    private Object[][] data = {
-            { "addins", "02.11.2006 19:15", "Folder", "", "1", "2", "3"},
-            { "AppPatch", "03.10.2006 14:10", "Folder", "", "1", "2", "3" },
-            { "assembly", "02.11.2006 14:20", "Folder", "", "1", "2", "3" },
-            { "Boot", "13.10.2007 10:46", "Folder", "", "1", "2", "3" },
-            { "Branding", "13.10.2007 12:10", "Folder", "", "1", "2", "3" },
-            { "Cursors", "23.09.2006 16:34", "Folder", "", "1", "2", "3" },
-            { "Debug", "07.12.2006 17:45", "Folder", "", "1", "2", "3" },
-            { "Fonts", "03.10.2006 14:08", "Folder", "", "1", "2", "3" },
-            { "AppPatch", "03.10.2006 14:10", "Folder", "", "1", "2", "3" },
-            { "assembly", "02.11.2006 14:20", "Folder", "", "1", "2", "3" },
-            { "Boot", "13.10.2007 10:46", "Folder", "", "1", "2", "3" },
-            { "Branding", "13.10.2007 12:10", "Folder", "", "1", "2", "3" },
-            { "Cursors", "23.09.2006 16:34", "Folder", "", "1", "2", "3" },
-            { "Debug", "07.12.2006 17:45", "Folder", "", "1", "2", "3" },
-            { "Fonts", "03.10.2006 14:08", "Folder", "", "1", "2", "3" },
-            { "AppPatch", "03.10.2006 14:10", "Folder", "", "1", "2", "3" },
-            { "assembly", "02.11.2006 14:20", "Folder", "", "1", "2", "3" },
-            { "Boot", "13.10.2007 10:46", "Folder", "", "1", "2", "3" },
-            { "Branding", "13.10.2007 12:10", "Folder", "", "1", "2", "3" },
-            { "Cursors", "23.09.2006 16:34", "Folder", "", "1", "2", "3" },
-            { "Debug", "07.12.2006 17:45", "Folder", "", "1", "2", "3" },
-            { "Fonts", "03.10.2006 14:08", "Folder", "", "1", "2", "3" },
-            { "AppPatch", "03.10.2006 14:10", "Folder", "", "1", "2", "3" },
-            { "assembly", "02.11.2006 14:20", "Folder", "", "1", "2", "3" },
-            { "Boot", "13.10.2007 10:46", "Folder", "", "1", "2", "3" },
-            { "Branding", "13.10.2007 12:10", "Folder", "", "1", "2", "3" },
-            { "Cursors", "23.09.2006 16:34", "Folder", "", "1", "2", "3" },
-            { "Debug", "07.12.2006 17:45", "Folder", "", "1", "2", "3" },
-            { "Fonts", "03.10.2006 14:08", "Folder", "", "1", "2", "3" },
-            { "Help", "08.11.2006 18:23", "Folder", "", "1", "2", "3" },
-            { "explorer.exe", "18.10.2006 14:13", "File", "2,93MB", "1", "2", "3" },
-            { "helppane.exe", "22.08.2006 11:39", "File", "4,58MB", "1", "2", "3" },
-            { "twunk.exe", "19.08.2007 10:37", "File", "1,08MB", "1", "2", "3" },
-            { "nsreg.exe", "07.08.2007 11:14", "File", "2,10MB", "1", "2", "3" },
-            { "avisp.exe", "17.12.2007 16:58", "File", "12,67MB", "1", "2", "3" },
-    };
+    private List<List<Object>> data = new ArrayList<List<Object>>();
+
+    public STableModel() {
+        ArrayList<Object> arrayList = new ArrayList<Object>();
+        arrayList.add("Stud's Name");
+        arrayList.add("Stud's Name");
+        arrayList.add("Stud's Name");
+        arrayList.add("Stud's Name");
+        arrayList.add("Stud's Name");
+        arrayList.add("Stud's Name");
+        arrayList.add("Stud's Name");
+        data.add(arrayList);
+        ArrayList<Object> arrayList2 = new ArrayList<Object>();
+        arrayList2.add("Stud's Name");
+        arrayList2.add("Stud's Name");
+        arrayList2.add("Stud's Name");
+        arrayList2.add("Stud's Name");
+        arrayList2.add("Stud's Name");
+        arrayList2.add("Stud's Name");
+        arrayList2.add("Stud's Name");
+        data.add(arrayList2);
+        data.add(arrayList2);
+        ArrayList<Object> arrayList3 = new ArrayList<Object>();
+        arrayList3.add("Stud's Name");
+        arrayList3.add("Stud's Name");
+        arrayList3.add("Stud's Name");
+        arrayList3.add("Stud's Name");
+        arrayList3.add("Stud's Name");
+        arrayList3.add("Stud's Name");
+        arrayList3.add("Stud's Name");
+        data.add(arrayList3);
+
+    }
+
     public int getColumnCount() {
         return columnNames.length;
     }
 
     public int getRowCount() {
-        return data.length;
+        return data.size();
     }
 
     public String getColumnName(int col) {
@@ -61,7 +60,7 @@ public class STableModel extends AbstractTableModel {
     }
 
     public Object getValueAt(int row, int col) {
-        return data[row][col];
+        return data.get(row).get(col);
     }
 
     public Class getColumnClass(int c) {
@@ -69,14 +68,61 @@ public class STableModel extends AbstractTableModel {
     }
 
     public boolean isCellEditable(int row, int col) {
-        if (col < 2) {
-            return false;
-        } else {
-            return true;
-        }
+        return col >= 2;
     }
     public void setValueAt(Object value, int row, int col) {
-        data[row][col] = value;
+        data.get(row).set(col, value);
         fireTableCellUpdated(row, col);
     }
+    public void replaceData(String[] data, int row) {
+        for(int pos = 0; pos < columnNames.length; pos++) {
+            setValueAt(data[pos], row, pos);
+        }
+    }
+    public void insertData(String[] data) {
+        List<Object> list = new ArrayList<Object>();
+        for (String str : data) {
+            list.add(str);
+        }
+        this.data.add(list);
+    }
+    public int deleteData(String[] data) {
+        boolean delFlag;
+        int countOfDeleted = 0;
+        for (int row = 0; row < this.data.size(); row++) {
+            delFlag = true;
+            List<Object> list = this.data.get(row);
+            for (int col = 0; col < list.size(); col++) {
+                if(!"".equals(data[col]) && !list.get(col).equals(data[col])) {
+                    delFlag = false;
+                    break;
+                }
+            }
+            if (delFlag) {
+                countOfDeleted++;
+                this.data.remove(row);
+                row--;
+            }
+        }
+        return countOfDeleted;
+    }
+    public List<List<Object>> findData(String[] data) {
+        List<List<Object>> results = new ArrayList<List<Object>>();
+        boolean checkFlag;
+        for (int row = 0; row < this.data.size(); row++) {
+            checkFlag = true;
+            List<Object> list = this.data.get(row);
+            for (int col = 0; col < list.size(); col++) {
+                if(!"".equals(data[col]) && !list.get(col).equals(data[col])) {
+                    checkFlag = false;
+                    break;
+                }
+            }
+            if (checkFlag) {
+                results.add(list);
+            }
+        }
+        return results;
+    }
+
 }

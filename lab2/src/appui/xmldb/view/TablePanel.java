@@ -2,12 +2,10 @@ package appui.xmldb.view;
 
 import appui.xmldb.controller.AppController;
 import appui.xmldb.model.STableModel;
-import appui.xmldb.utils.TableColumnAdjuster;
-import org.w3c.dom.Attr;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+import org.w3c.dom.*;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
@@ -27,9 +25,9 @@ import static javax.swing.BorderFactory.createEmptyBorder;
 
 public class TablePanel extends JPanel{
     private JTable table;
-    private TableColumnAdjuster tableAdjuster;
     private int countOfRows = 10;
     private JTextField rowsField;
+    private STableModel tableModel;
 
     public TablePanel() {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -44,9 +42,16 @@ public class TablePanel extends JPanel{
         JPanel navigation = createNavigation(sp);
         add(navigation);
         exportToFile("1.xml");
+        String[] art = { "1", "2", "3", "4", "5", "6", "7"};
+        tableModel.insertData(art);
+        String[] ololol = {"Stud's Name", "", "", "Stud's Name", "", "Stud's Name", ""};
+        tableModel.findData(ololol);
+        //tableModel.deleteData(ololol);
+        importFromXML("1.xml");
     }
     private JScrollPane createTable() {
-        table = new JTable(new STableModel());
+        tableModel = new STableModel();
+        table = new JTable(tableModel);
         table.setPreferredScrollableViewportSize(new Dimension(TableConstants.TABLE_WIDTH, table.getRowHeight()*countOfRows));
         table.setFillsViewportHeight(true);
        /* table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
@@ -168,7 +173,36 @@ public class TablePanel extends JPanel{
         }
     }
     public void importFromXML(String fileName) {
+        DocumentBuilderFactory domFactory = DocumentBuilderFactory.newInstance();
+        try {
+            DocumentBuilder builder = domFactory.newDocumentBuilder();
+            Document doc = builder.parse(fileName);
 
+            Element root = doc.getDocumentElement();
+
+            NodeList nodeList = root.getChildNodes();
+
+            String[] st = new String[7];
+
+            for (int i = 0; i < nodeList.getLength(); i++)
+            {
+                Node node = nodeList.item(i);
+                if (node.getNodeType() == node.ENTITY_NODE) {
+                    st[0] = node.getChildNodes().item(1).getTextContent();
+                    st[1] = node.getChildNodes().item(3).getTextContent();
+                    st[2] = node.getChildNodes().item(5).getTextContent();
+                    st[3] = node.getChildNodes().item(7).getTextContent();
+                    st[1] = node.getChildNodes().item(9).getTextContent();
+                    st[2] = node.getChildNodes().item(11).getTextContent();
+                    st[3] = node.getChildNodes().item(13).getTextContent();
+                    ((DefaultTableModel) table.getModel()).addRow(st);
+                }
+
+            }
+        }
+        catch (Exception exception) {
+            AppController.APP_LOGGER.error(exception);
+        }
     }
 }
 
