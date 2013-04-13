@@ -196,6 +196,7 @@ public class TablePanel extends JPanel{
                     st[2] = node.getChildNodes().item(11).getTextContent();
                     st[3] = node.getChildNodes().item(13).getTextContent();
                     ((DefaultTableModel) table.getModel()).addRow(st);
+
                 }
 
             }
