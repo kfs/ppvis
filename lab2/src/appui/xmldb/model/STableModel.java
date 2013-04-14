@@ -89,6 +89,7 @@ public class STableModel extends AbstractTableModel {
             list.add(str);
         }
         this.data.add(list);
+        fireTableDataChanged();
     }
     public int deleteData(String[] data) {
         boolean delFlag;

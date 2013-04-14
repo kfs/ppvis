@@ -152,17 +152,16 @@ public class TablePanel extends JPanel{
             Element tableEl = doc.createElement("students");
             doc.appendChild(tableEl);
 
-            TableModel model = table.getModel();
             TableColumnModel columns = table.getColumnModel();
 
-            for (int i = 0; i < model.getRowCount(); i++) {
+            for (int i = 0; i < tableModel.getRowCount(); i++) {
                 Element rowEl = doc.createElement("studentInfo");
                 tableEl.appendChild(rowEl);
 
                 for (int j = 0; j < columns.getColumnCount(); j++) {
                     TableColumn col = columns.getColumn(j);
                     String header = col.getHeaderValue().toString();
-                    String value = model.getValueAt(i, j).toString();
+                    String value = tableModel.getValueAt(i, j).toString();
                     Element cellEl = doc.createElement("info");
                     Attr colAttr = doc.createAttribute("about");
                     cellEl.setAttributeNode(colAttr);
@@ -197,8 +196,7 @@ public class TablePanel extends JPanel{
 
             List<List<Object>> tableList = new ArrayList<List<Object>>();
             List<Object> tableInfo;
-            STableModel sTableModel = (STableModel) table.getModel();
-            String[] tableColumns = sTableModel.getColumnNames();
+            String[] tableColumns = tableModel.getColumnNames();
 
             for (int currStudNode = 0; currStudNode < studentsList.getLength(); currStudNode++) {
                 studNode = studentsList.item(currStudNode);
@@ -229,11 +227,14 @@ public class TablePanel extends JPanel{
                     }
                 }
             }
-            sTableModel.merge(tableList);
+            tableModel.merge(tableList);
         }
         catch (Exception exception) {
             AppController.APP_LOGGER.error(exception);
         }
+    }
+    public void addItem(String[] item) {
+        tableModel.insertData(item);
     }
 }
 

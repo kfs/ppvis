@@ -7,7 +7,7 @@ import javax.swing.*;
 public enum NavigationItem {
     OPEN(EventConstants.OPEN_FILE, new ImageIcon("imgs/open.png")),
     SAVE(EventConstants.SAVE_FILE, new ImageIcon("imgs/save.png")),
-    CLOSE(EventConstants.EXIT, new ImageIcon("imgs/close.png")),
+    CLOSE(EventConstants.EXIT, new ImageIcon("imgs/exit.png")),
     ADD(EventConstants.ADD, new ImageIcon("imgs/new.png")),
     DELETE(EventConstants.DELETE, new ImageIcon("imgs/cut.png")),
     FIND(EventConstants.FIND, new ImageIcon("imgs/copy.png")),
