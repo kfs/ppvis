@@ -1,5 +1,10 @@
 package appui.xmldb.view.dialogs;
 
+import appui.xmldb.controller.AppController;
+import appui.xmldb.utils.AppConstants;
+import appui.xmldb.view.dialogs.events.ApplyAddEvent;
+import appui.xmldb.view.dialogs.events.CancelEvent;
+
 import javax.swing.*;
 
 public class AddItemDialog extends JDialog {
@@ -13,8 +18,10 @@ public class AddItemDialog extends JDialog {
     private java.util.List<LabeledField> asf;
 
     public AddItemDialog() {
-        setTitle("Add Dialog");
-        setSize(300, 310);
+        String title = AppController.getBundle().getString(AppConstants.ADD_DIALOG);
+        setTitle(title);
+        setBounds(AppConstants.DIALOG_WINDOW_INDENT_X, AppConstants.DIALOG_WINDOW_INDENT_Y,
+                  AppConstants.DIALOG_WINDOW_HEIGHT,   AppConstants.DIALOG_WINDOW_WIDTH);
         setResizable(false);
         initDialog();
     }
@@ -56,7 +63,6 @@ class LabeledField extends JPanel {
 
     LabeledField(String labelName) {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        setSize(50, 250);
         addLabel(labelName);
         addField();
     }
@@ -68,6 +74,6 @@ class LabeledField extends JPanel {
         textField = new JTextField();
         add(textField);
     }
-
+    //private class
 }
 

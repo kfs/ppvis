@@ -10,7 +10,7 @@ public class EventController {
     private EventController() {
 
     }
-    public static ActionListener getListener(NavigationItem item, WndFrame wndFrame) {
+    public static ActionListener getListener(NavigationItem item) {
         String itemName = item.getItemName();
         if (EventConstants.OPEN_FILE.equals(itemName)) {
             return new OpenAction();

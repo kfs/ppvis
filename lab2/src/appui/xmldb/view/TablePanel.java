@@ -5,10 +5,7 @@ import appui.xmldb.model.STableModel;
 import org.w3c.dom.*;
 
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableColumn;
-import javax.swing.table.TableColumnModel;
-import javax.swing.table.TableModel;
+import javax.swing.table.*;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.OutputKeys;
@@ -16,10 +13,13 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import static javax.swing.BorderFactory.createEmptyBorder;
 
@@ -35,9 +35,7 @@ public class TablePanel extends JPanel{
     }
 
     private void initPanelUI() {
-        //JPanel tablePar = new JPanel();
         JScrollPane sp = createTable();
-       //tablePar.add(sp);
         add(sp);
         JPanel navigation = createNavigation(sp);
         add(navigation);
@@ -66,66 +64,79 @@ public class TablePanel extends JPanel{
                 height += columnHeader.getViewSize().getHeight();
                 height += viewport.getView().getPreferredSize().getHeight();
                 height += (getViewportBorderBounds().getHeight() * -1);
-                Dimension returnValue = new Dimension ((int) width, (int) height);
-                return returnValue;
+                return new Dimension ((int) width, (int) height);
             }
         };
         sp.setBorder(createEmptyBorder());
         return sp;
     }
     private JPanel createNavigation(final JScrollPane sp) {
-        JPanel navigation = new JPanel(
-                new FlowLayout(FlowLayout.CENTER));
+        JPanel navigation = new JPanel(new FlowLayout(FlowLayout.CENTER));
         JButton next = new JButton("Next");
-        next.addActionListener( new ActionListener(){
-            public void actionPerformed(ActionEvent ae) {
-                int height = table.getRowHeight()*countOfRows;
-                JScrollBar bar = sp.getVerticalScrollBar();
-                bar.setValue( bar.getValue()+height );
-            }
-        } );
+        next.addActionListener(new NavNextEvent(sp));
         JButton previous = new JButton("Prev");
-        previous.addActionListener( new ActionListener(){
-            public void actionPerformed(ActionEvent ae) {
-                int height = table.getRowHeight()*countOfRows;
-                JScrollBar bar = sp.getVerticalScrollBar();
-                bar.setValue( bar.getValue()-height );
-            }
-        } );
-        final JTextField rowsField = new JTextField(Integer.toString(countOfRows));
-        rowsField.addActionListener(
-                new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        try {
-                        countOfRows = Integer.parseInt(rowsField.getText());
-                        }
-                        catch (Exception exception) {
-                            AppController.APP_LOGGER.error(exception);
-                            return;
-                        }
-                        int rowCount = table.getRowCount();
-                        if(countOfRows > rowCount) {
-                            countOfRows = rowCount;
-                            rowsField.setText(Integer.toString(rowCount));
-                        }
-                        else if(countOfRows <= 0) {
-                            countOfRows = rowCount == 0 ? 1 : rowCount;
-                        }
-                        table.setPreferredScrollableViewportSize(
-                                new Dimension(TableConstants.TABLE_WIDTH,
-                                        table.getRowHeight()*countOfRows)
-                        );
-                        sp.getParent().revalidate();
-                        //sp.revalidate();
-                        table.revalidate();
-                    }
-                }
-        );
+        previous.addActionListener(new NavPrevEvent(sp));
+        rowsField = new JTextField(Integer.toString(countOfRows));
+        rowsField.addActionListener(new VisibleCountEvent(sp));
         navigation.add(previous);
         navigation.add(rowsField);
         navigation.add(next);
         return navigation;
+    }
+    class VisibleCountEvent implements ActionListener {
+        private JScrollPane sp;
+        public VisibleCountEvent(JScrollPane sp) {
+            this.sp = sp;
+        }
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            try {
+                countOfRows = Integer.parseInt(rowsField.getText());
+            }
+            catch (Exception exception) {
+                AppController.APP_LOGGER.error(exception);
+                return;
+            }
+            int rowCount = table.getRowCount();
+            if(countOfRows > rowCount) {
+                countOfRows = rowCount;
+                rowsField.setText(Integer.toString(rowCount));
+            }
+            else if(countOfRows <= 0) {
+                countOfRows = rowCount == 0 ? 1 : rowCount;
+            }
+            table.setPreferredScrollableViewportSize(
+                    new Dimension(TableConstants.TABLE_WIDTH,
+                            table.getRowHeight()*countOfRows)
+            );
+            sp.getParent().revalidate();
+            //sp.revalidate();
+            table.revalidate();
+        }
+    }
+    class NavPrevEvent implements ActionListener {
+        private JScrollPane sp;
+        public NavPrevEvent(JScrollPane sp) {
+            this.sp = sp;
+        }
+        @Override
+        public void actionPerformed(ActionEvent ae) {
+            int height = table.getRowHeight() * countOfRows;
+            JScrollBar bar = sp.getVerticalScrollBar();
+            bar.setValue( bar.getValue() - height );
+        }
+    }
+    class NavNextEvent implements ActionListener {
+        private JScrollPane sp;
+        public NavNextEvent(JScrollPane sp) {
+            this.sp = sp;
+        }
+        @Override
+        public void actionPerformed(ActionEvent ae) {
+            int height = table.getRowHeight() * countOfRows;
+            JScrollBar bar = sp.getVerticalScrollBar();
+            bar.setValue( bar.getValue() + height );
+        }
     }
     public void exportToFile(String fileName) {
         try {
@@ -138,22 +149,22 @@ public class TablePanel extends JPanel{
             }
 
             Document doc = builder.newDocument();
-            Element tableEl = doc.createElement("studentInfo");
+            Element tableEl = doc.createElement("students");
             doc.appendChild(tableEl);
 
             TableModel model = table.getModel();
             TableColumnModel columns = table.getColumnModel();
 
             for (int i = 0; i < model.getRowCount(); i++) {
-                Element rowEl = doc.createElement("student");
+                Element rowEl = doc.createElement("studentInfo");
                 tableEl.appendChild(rowEl);
 
                 for (int j = 0; j < columns.getColumnCount(); j++) {
                     TableColumn col = columns.getColumn(j);
                     String header = col.getHeaderValue().toString();
                     String value = model.getValueAt(i, j).toString();
-                    Element cellEl = doc.createElement("cell");
-                    Attr colAttr = doc.createAttribute("colName");
+                    Element cellEl = doc.createElement("info");
+                    Attr colAttr = doc.createAttribute("about");
                     cellEl.setAttributeNode(colAttr);
                     rowEl.appendChild(cellEl);
                     colAttr.appendChild(doc.createTextNode(header));
@@ -176,30 +187,49 @@ public class TablePanel extends JPanel{
         DocumentBuilderFactory domFactory = DocumentBuilderFactory.newInstance();
         try {
             DocumentBuilder builder = domFactory.newDocumentBuilder();
-            Document doc = builder.parse(fileName);
+            File file = new File(fileName);
+            Document doc = builder.parse(file);
 
-            Element root = doc.getDocumentElement();
+            Node rootNode = doc.getChildNodes().item(0);
 
-            NodeList nodeList = root.getChildNodes();
+            NodeList studentsList = rootNode.getChildNodes();
+            Node studNode;
 
-            String[] st = new String[7];
+            List<List<Object>> tableList = new ArrayList<List<Object>>();
+            List<Object> tableInfo;
+            STableModel sTableModel = (STableModel) table.getModel();
+            String[] tableColumns = sTableModel.getColumnNames();
 
-            for (int i = 0; i < nodeList.getLength(); i++)
-            {
-                Node node = nodeList.item(i);
-                if (node.getNodeType() == node.ENTITY_NODE) {
-                    st[0] = node.getChildNodes().item(1).getTextContent();
-                    st[1] = node.getChildNodes().item(3).getTextContent();
-                    st[2] = node.getChildNodes().item(5).getTextContent();
-                    st[3] = node.getChildNodes().item(7).getTextContent();
-                    st[1] = node.getChildNodes().item(9).getTextContent();
-                    st[2] = node.getChildNodes().item(11).getTextContent();
-                    st[3] = node.getChildNodes().item(13).getTextContent();
-                    ((DefaultTableModel) table.getModel()).addRow(st);
-
+            for (int currStudNode = 0; currStudNode < studentsList.getLength(); currStudNode++) {
+                studNode = studentsList.item(currStudNode);
+                if (studNode.getNodeType() == Node.ELEMENT_NODE) {
+                    NodeList infoNodes = studNode.getChildNodes();
+                    Node infoNode;
+                    int attrPos = 0;
+                    tableInfo = new ArrayList<Object>();
+                    for (int currInfoNode = 0; currInfoNode < infoNodes.getLength(); currInfoNode++) {
+                        infoNode = infoNodes.item(currInfoNode);
+                        String nodeValue = "null";
+                        if (infoNode.getNodeType() == Node.ELEMENT_NODE) {
+                            String attrValue = infoNode.getAttributes().getNamedItem("about").getNodeValue();
+                            if (tableColumns[attrPos].equals(attrValue)) {
+                                nodeValue = infoNode.getFirstChild().getNodeValue();
+                                attrPos++;
+                            }
+                            else {
+                                nodeValue = "";
+                            }
+                        }
+                        if(!nodeValue.equals("null")) {
+                            tableInfo.add(nodeValue);
+                        }
+                    }
+                    if(tableInfo.size() > 0) {
+                        tableList.add(tableInfo);
+                    }
                 }
-
             }
+            sTableModel.merge(tableList);
         }
         catch (Exception exception) {
             AppController.APP_LOGGER.error(exception);

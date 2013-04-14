@@ -59,6 +59,10 @@ public class STableModel extends AbstractTableModel {
         return columnNames[col];
     }
 
+    public String[] getColumnNames() {
+        return columnNames;
+    }
+
     public Object getValueAt(int row, int col) {
         return data.get(row).get(col);
     }
@@ -124,5 +128,7 @@ public class STableModel extends AbstractTableModel {
         }
         return results;
     }
-
+    public void merge(List<List<Object>> mergeList) {
+        data.addAll(mergeList);
+    }
 }
