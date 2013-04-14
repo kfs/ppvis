@@ -11,26 +11,22 @@ import java.util.ArrayList;
 import java.util.ResourceBundle;
 
 public class AddItemDialog extends JDialog {
-    private LabeledField studName;
-    private LabeledField fatherName;
-    private LabeledField fatherEarn;
-    private LabeledField motherName;
-    private LabeledField motherEarn;
-    private LabeledField broCount;
-    private LabeledField sisCount;
     private java.util.List<LabeledField> fields = new ArrayList<LabeledField>();
     private TablePanel panel;
 
     public AddItemDialog(TablePanel panel) {
         this.panel = panel;
+        initDialog();
+        initDialogGUI();
+    }
+    private void initDialog() {
         String title = AppController.getBundle().getString(AppConstants.ADD_DIALOG);
         setTitle(title);
         setBounds(AppConstants.DIALOG_WINDOW_INDENT_X, AppConstants.DIALOG_WINDOW_INDENT_Y,
-                AppConstants.DIALOG_WINDOW_HEIGHT, AppConstants.DIALOG_WINDOW_WIDTH);
+                AppConstants.DIALOG_WINDOW_WIDTH,    AppConstants.DIALOG_WINDOW_HEIGHT);
         setResizable(false);
-        initDialog();
     }
-    private void initDialog() {
+    private void initDialogGUI() {
         setLayout(new BoxLayout(getContentPane(), BoxLayout.PAGE_AXIS));
         String[] fieldLabels = {"Student's Name:",
                                 "Father's Name:",
